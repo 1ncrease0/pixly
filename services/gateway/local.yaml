@@ -1,0 +1,26 @@
+env: "local"
+
+http_server:
+  host: "localhost"
+  port: 4000
+  read_timeout: 5s
+  write_timeout: 5s
+  idle_timeout: 120s
+  shutdown_timeout: 5s
+  cors:
+    enabled: true
+    allowed_origins:
+      - "http://localhost:3000"
+    allowed_methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
+      - "PATCH"
+      - "OPTIONS"
+    allowed_headers:
+      - "Content-Type"
+      - "Authorization"
+      - "X-Requested-With"
+    allow_credentials: true
+    max_age: 1h
