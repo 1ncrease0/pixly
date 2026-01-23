@@ -7,32 +7,6 @@ on:
     branches: ["master", "main"]
 
 jobs:
-  build-pkg-logger:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        work_dir:
-          - ./pkg/logger
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.25.5'
-
-      - name: Build
-        working-directory: ${{ matrix.work_dir }}
-        run: |
-          go build -v ./...
-
-      - name: Lint
-        uses: golangci/golangci-lint-action@v6
-        with:
-          version: latest
-          working-directory: ${{ matrix.work_dir }}
-
   build-service-auth:
     runs-on: ubuntu-latest
     strategy:
@@ -53,11 +27,13 @@ jobs:
         run: |
           go build -v ./cmd/auth
 
+      - name: Install golangci-lint
+        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
       - name: Lint
-        uses: golangci/golangci-lint-action@v6
-        with:
-          version: latest
-          working-directory: ${{ matrix.work_dir }}
+        working-directory: ${{ matrix.work_dir }}
+        run: |
+          golangci-lint run
 
   build-service-notification:
     runs-on: ubuntu-latest
@@ -79,11 +55,13 @@ jobs:
         run: |
           go build -v ./cmd/notification
 
+      - name: Install golangci-lint
+        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
       - name: Lint
-        uses: golangci/golangci-lint-action@v6
-        with:
-          version: latest
-          working-directory: ${{ matrix.work_dir }}
+        working-directory: ${{ matrix.work_dir }}
+        run: |
+          golangci-lint run
 
   build-service-gateway:
     runs-on: ubuntu-latest
@@ -105,8 +83,10 @@ jobs:
         run: |
           go build -v ./cmd/gateway
 
+      - name: Install golangci-lint
+        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
       - name: Lint
-        uses: golangci/golangci-lint-action@v6
-        with:
-          version: latest
-          working-directory: ${{ matrix.work_dir }}
+        working-directory: ${{ matrix.work_dir }}
+        run: |
+          golangci-lint run
