@@ -4,7 +4,7 @@ package auth;
 
 option go_package = "pixly.auth.v1;authv1";
 
-service AuthService {
+service Auth {
   rpc Register(RegisterRequest) returns (RegisterResponse);
   rpc VerifyEmail(VerifyEmailRequest) returns (VerifyEmailResponse);
 }
