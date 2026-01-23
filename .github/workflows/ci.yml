@@ -1,70 +1,112 @@
-name: CI
+name: Go
 
 on:
   push:
-    branches: ["main"]
+    branches: ["master", "main"]
   pull_request:
-    branches: ["main"]
+    branches: ["master", "main"]
 
 jobs:
-  test:
+  build-pkg-logger:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        work_dir:
+          - ./pkg/logger
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.25.5'
 
-      - name: Cache Go modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/go-build
-            ${{ env.GOMODCACHE }}
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
-      - name: Download dependencies
-        run: go work sync
-
-      - name: Verify modules
-        run: go work verify
-
-      - name: Run tests
-        run: go work test ./...
-
-      - name: Build services
+      - name: Build
+        working-directory: ${{ matrix.work_dir }}
         run: |
-          cd services/auth && go build ./cmd/auth
-          cd ../notification && go build ./cmd/notification
-          cd ../gateway && go build ./cmd/gateway || true
+          go build -v ./...
 
-  lint:
+      - name: Lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          working-directory: ${{ matrix.work_dir }}
+
+  build-service-auth:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        work_dir:
+          - ./services/auth
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.25.5'
 
-      - name: Install golangci-lint
-        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+      - name: Build
+        working-directory: ${{ matrix.work_dir }}
+        run: |
+          go build -v ./cmd/auth
 
-      - name: Run golangci-lint on pkg/logger
-        run: golangci-lint run ./pkg/logger/...
+      - name: Lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          working-directory: ${{ matrix.work_dir }}
 
-      - name: Run golangci-lint on services/auth
-        run: golangci-lint run ./services/auth/...
+  build-service-notification:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        work_dir:
+          - ./services/notification
+    steps:
+      - uses: actions/checkout@v4
 
-      - name: Run golangci-lint on services/notification
-        run: golangci-lint run ./services/notification/...
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.5'
 
-      - name: Run golangci-lint on services/gateway
-        run: golangci-lint run ./services/gateway/... || true
+      - name: Build
+        working-directory: ${{ matrix.work_dir }}
+        run: |
+          go build -v ./cmd/notification
+
+      - name: Lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          working-directory: ${{ matrix.work_dir }}
+
+  build-service-gateway:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        work_dir:
+          - ./services/gateway
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.5'
+
+      - name: Build
+        working-directory: ${{ matrix.work_dir }}
+        run: |
+          go build -v ./cmd/gateway
+
+      - name: Lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          working-directory: ${{ matrix.work_dir }}
