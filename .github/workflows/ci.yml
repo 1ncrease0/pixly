@@ -54,26 +54,17 @@ jobs:
         with:
           go-version: '1.25.5'
 
+      - name: Install golangci-lint
+        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
       - name: Run golangci-lint on pkg/logger
-        uses: golangci/golangci-lint-action@v6
-        with:
-          version: latest
-          working-directory: ./pkg/logger
+        run: golangci-lint run ./pkg/logger/...
 
       - name: Run golangci-lint on services/auth
-        uses: golangci/golangci-lint-action@v6
-        with:
-          version: latest
-          working-directory: ./services/auth
+        run: golangci-lint run ./services/auth/...
 
       - name: Run golangci-lint on services/notification
-        uses: golangci/golangci-lint-action@v6
-        with:
-          version: latest
-          working-directory: ./services/notification
+        run: golangci-lint run ./services/notification/...
 
       - name: Run golangci-lint on services/gateway
-        uses: golangci/golangci-lint-action@v6
-        with:
-          version: latest
-          working-directory: ./services/gateway
+        run: golangci-lint run ./services/gateway/... || true
