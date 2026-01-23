@@ -6,11 +6,11 @@ import (
 )
 
 var (
-	ErrUserNotFound         = errors.New("user not found")
-	ErrUserAlreadyExists    = errors.New("user already exists")
-	ErrUsernameTaken        = errors.New("user username taken")
-	ErrNilUser              = errors.New("nil user")
-	ErrVerificationNotFound = errors.New("verification not found")
+	ErrUserNotFound             = errors.New("user not found")
+	ErrUserAlreadyExists        = errors.New("user already exists")
+	ErrUsernameTaken            = errors.New("user username taken")
+	ErrNilUser                  = errors.New("nil user")
+	ErrVerificationCodeNotFound = errors.New("verification not found")
 )
 
 type User struct {

@@ -10,12 +10,13 @@ import (
 type UserRepo interface {
 	Create(ctx context.Context, user *domain.User) error
 	UserByEmail(ctx context.Context, email domain.Email) (*domain.User, error)
-	//	UserByID(ctx context.Context, id uuid.UUID) (*domain.User, error)
+	Verify(ctx context.Context, userID uuid.UUID) error
 }
 
 type VerificationRepo interface {
 	Save(ctx context.Context, codeHash string, userID uuid.UUID) error
 	Get(ctx context.Context, codeHash string) (uuid.UUID, error)
+	Delete(ctx context.Context, codeHash string) error
 }
 
 type VerificationSender interface {
@@ -42,15 +43,24 @@ func (s *AuthService) Register(ctx context.Context, email domain.Email, name dom
 		return err
 	}
 
-	return s.SendVerification(ctx, user)
+	return s.sendVerification(ctx, user)
 }
 
 func (s *AuthService) VerifyEmail(ctx context.Context, code domain.VerificationCode) error {
+	userID, err := s.verificationRepo.Get(ctx, code.Hash())
+	if err != nil {
+		return err
+	}
+	if err := s.userRepo.Verify(ctx, userID); err != nil {
+		return err
+	}
+
+	_ = s.verificationRepo.Delete(ctx, code.Hash())
 
 	return nil
 }
 
-func (s *AuthService) SendVerification(ctx context.Context, u *domain.User) error {
+func (s *AuthService) sendVerification(ctx context.Context, u *domain.User) error {
 	code := domain.NewVerificationCode()
 
 	if err := s.verificationRepo.Save(ctx, code.Hash(), u.ID()); err != nil {

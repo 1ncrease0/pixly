@@ -113,3 +113,22 @@ func (r *UserRepo) Create(ctx context.Context, user *domain.User) error {
 
 	return nil
 }
+
+func (r *UserRepo) Verify(ctx context.Context, userID uuid.UUID) error {
+	const query = `
+		UPDATE users
+		SET is_verified = true
+		WHERE id = $1
+	`
+
+	result, err := r.db.Exec(ctx, query, userID)
+	if err != nil {
+		return fmt.Errorf("failed to verify user: %w", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return domain.ErrUserNotFound
+	}
+
+	return nil
+}

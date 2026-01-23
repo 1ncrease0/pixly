@@ -34,9 +34,13 @@ func (r *VerificationRepo) Get(ctx context.Context, codeHash string) (uuid.UUID,
 	val, err := r.client.Get(ctx, r.key(codeHash)).Result()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
-			return uuid.Nil, domain.ErrVerificationNotFound
+			return uuid.Nil, domain.ErrVerificationCodeNotFound
 		}
 		return uuid.Nil, err
 	}
 	return uuid.Parse(val)
+}
+
+func (r *VerificationRepo) Delete(ctx context.Context, codeHash string) error {
+	return r.client.Del(ctx, r.key(codeHash)).Err()
 }

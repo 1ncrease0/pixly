@@ -86,10 +86,13 @@ func (p Password) Equals(raw string) bool {
 	return err == nil
 }
 
-var ErrInvalidCode = errors.New("invalid verification code")
-
 type VerificationCode struct {
 	value string
+}
+
+func NewVerificationCodeFromString(raw string) VerificationCode {
+	raw = strings.TrimSpace(raw)
+	return VerificationCode{value: raw}
 }
 
 func NewVerificationCode() VerificationCode {
