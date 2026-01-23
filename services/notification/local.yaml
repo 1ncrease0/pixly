@@ -1,0 +1,10 @@
+env: "local"
+
+rabbitmq:
+  url: 'amqp://guest:123456@localhost:5672'
+  queue: 'notifications_queue'
+  workers: 5
+
+email:
+  from: 'no-reply@pixly.com'
+  base: 'localhost:8080'

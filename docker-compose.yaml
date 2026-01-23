@@ -1,0 +1,51 @@
+services:
+  auth_postgres:
+    container_name: auth_postgres
+    image: postgres:17
+    restart: always
+    environment:
+      POSTGRES_DB: ${AUTH_POSTGRES_DB}
+      POSTGRES_USER: ${AUTH_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${AUTH_POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - auth_pgdata:/var/lib/postgresql/data
+    networks:
+      - pixly
+
+  auth_redis:
+    image: redis:7
+    container_name: auth_redis
+    restart: always
+    command: ["redis-server", "--requirepass", "${AUTH_REDIS_PASSWORD}"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - auth_redis_data:/data
+    networks:
+      - pixly
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - pixly
+
+volumes:
+  auth_pgdata:
+  auth_redis_data:
+  rabbitmq_data:
+
+
+networks:
+  pixly:

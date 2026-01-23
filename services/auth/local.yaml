@@ -1,0 +1,23 @@
+env: "local"
+
+grpc:
+  port: 50051
+
+jwt:
+  secret_key: "secretkey"
+  access_ttl: 15m
+  refresh_ttl: 720h
+
+verification:
+  ttl: 10m
+
+postgres:
+  dsn: "postgres://postgres:123456@localhost:5432/auth?sslmode=disable"
+
+redis:
+  addr: "localhost:6379"
+  password: "123456"
+
+rabbitmq:
+  url: 'amqp://guest:123456@localhost:5672'
+  queue: 'notifications_queue'
