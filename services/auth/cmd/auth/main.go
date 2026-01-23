@@ -2,15 +2,18 @@ package main
 
 import (
 	"context"
+	"github.com/1ncrease0/pixly/pkg/grpcserver"
 	"github.com/1ncrease0/pixly/pkg/logger"
 	"github.com/1ncrease0/pixly/services/auth/internal/config"
-	"github.com/1ncrease0/pixly/services/auth/internal/domain"
+	grpcauth "github.com/1ncrease0/pixly/services/auth/internal/infra/grpc/auth"
 	"github.com/1ncrease0/pixly/services/auth/internal/infra/rabbitmq"
 	"github.com/1ncrease0/pixly/services/auth/internal/infra/storage/postgres"
 	"github.com/1ncrease0/pixly/services/auth/internal/infra/storage/redis"
 	"github.com/1ncrease0/pixly/services/auth/internal/service/auth"
 	"log/slog"
-	"time"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -48,19 +51,24 @@ func main() {
 		}
 	}()
 
+	gRPCServer := grpcserver.New(log, cfg.GRPC.Port)
+
 	verificationRepo := redis.NewVerificationRepo(rds.Client, cfg.Verification.TTL)
 	userRepo := postgres.NewUserRepo(pg.Pool)
 
 	authService := auth.NewAuthService(userRepo, verificationRepo, producer)
+	grpcauth.Register(gRPCServer.Server(), authService)
 
-	email, _ := domain.NewEmail("email@gmail.com")
-	password, _ := domain.NewPassword("12345678")
-	name, _ := domain.NewUsername("username")
-	err = authService.Register(context.Background(), email, name, password)
-	if err != nil {
-		log.Error("failed to register auth", slog.Any("error", err))
+	gRPCServer.Start()
+	defer gRPCServer.Shutdown()
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	select {
+	case err := <-gRPCServer.Notify():
+		log.Error("grpc server error", slog.Any("error", err))
+	case <-ctx.Done():
+		log.Info("shutting down")
 	}
-
-	time.Sleep(10 * time.Second)
-
 }

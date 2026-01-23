@@ -1,4 +1,4 @@
-module github.com/1ncrease0/pixly/pkg/gateway
+module github.com/1ncrease0/pixly/pkg/grpcserver
 
 go 1.25.5
 

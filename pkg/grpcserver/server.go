@@ -53,6 +53,10 @@ func InterceptorLogger(l *slog.Logger) logging.Logger {
 	})
 }
 
+func (s *Server) Server() *grpc.Server {
+	return s.gRPCServer
+}
+
 func (s *Server) Start() {
 	go func() {
 		defer close(s.notify)
