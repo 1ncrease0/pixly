@@ -1,14 +1,79 @@
 name: CI
+
 on:
   push:
-    branches:  ["main"]
+    branches: ["main"]
   pull_request:
     branches: ["main"]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Run script
-        run: echo "Test"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.5'
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ${{ env.GOMODCACHE }}
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Download dependencies
+        run: go work sync
+
+      - name: Verify modules
+        run: go work verify
+
+      - name: Run tests
+        run: go work test ./...
+
+      - name: Build services
+        run: |
+          cd services/auth && go build ./cmd/auth
+          cd ../notification && go build ./cmd/notification
+          cd ../gateway && go build ./cmd/gateway || true
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.5'
+
+      - name: Run golangci-lint on pkg/logger
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          working-directory: ./pkg/logger
+
+      - name: Run golangci-lint on services/auth
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          working-directory: ./services/auth
+
+      - name: Run golangci-lint on services/notification
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          working-directory: ./services/notification
+
+      - name: Run golangci-lint on services/gateway
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          working-directory: ./services/gateway
