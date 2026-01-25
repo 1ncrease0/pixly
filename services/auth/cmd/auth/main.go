@@ -41,7 +41,7 @@ func main() {
 
 	producer, err := rabbitmq.NewProducer(cfg.RabbitMQ.URL, cfg.RabbitMQ.Queue)
 	if err != nil {
-		log.Error("failed to connect kafka", slog.Any("error", err))
+		log.Error("failed to connect rabbitmq", slog.Any("error", err))
 		return
 	}
 	defer func() {
