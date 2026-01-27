@@ -37,7 +37,7 @@ type AuthService struct {
 	verificationRepo VerificationRepo
 	sender           VerificationSender
 	sessionRepo      SessionRepo
-	jwtManger        jwt.Manager
+	jwtManger        *jwt.Manager
 }
 
 func NewAuthService(
@@ -45,7 +45,7 @@ func NewAuthService(
 	verificationRepo VerificationRepo,
 	sender VerificationSender,
 	sessionRepo SessionRepo,
-	m jwt.Manager,
+	m *jwt.Manager,
 ) *AuthService {
 	return &AuthService{
 		userRepo:         userRepo,

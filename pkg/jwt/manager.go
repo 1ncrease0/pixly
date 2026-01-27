@@ -13,7 +13,6 @@ import (
 )
 
 var (
-	ErrEmptySigningKey         = errors.New("empty signing key")
 	ErrUnexpectedSigningMethod = errors.New("unexpected signing method")
 	ErrInvalidToken            = errors.New("invalid token")
 	ErrExpiredToken            = errors.New("token expired")
@@ -28,8 +27,8 @@ type Manager struct {
 	refreshTTL time.Duration
 }
 
-func NewManager(secret string, accessTTL time.Duration, refreshTTL time.Duration) Manager {
-	return Manager{
+func NewManager(secret string, accessTTL time.Duration, refreshTTL time.Duration) *Manager {
+	return &Manager{
 		secret:     secret,
 		accessTTL:  accessTTL,
 		refreshTTL: refreshTTL,
