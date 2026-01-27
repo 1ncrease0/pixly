@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"github.com/1ncrease0/pixly/pkg/grpcserver"
+	"github.com/1ncrease0/pixly/pkg/jwt"
 	"github.com/1ncrease0/pixly/pkg/logger"
 	"github.com/1ncrease0/pixly/services/auth/internal/config"
 	grpcauth "github.com/1ncrease0/pixly/services/auth/internal/infra/grpc/auth"
@@ -55,8 +56,9 @@ func main() {
 
 	verificationRepo := redis.NewVerificationRepo(rds.Client, cfg.Verification.TTL)
 	userRepo := postgres.NewUserRepo(pg.Pool)
-
-	authService := auth.NewAuthService(userRepo, verificationRepo, producer)
+	sessionRepo := postgres.NewSessionRepo(pg.Pool)
+	jwtManger := jwt.NewManager(cfg.JWT.Secret, cfg.JWT.AccessTTL, cfg.JWT.RefreshTTL)
+	authService := auth.NewAuthService(userRepo, verificationRepo, producer, sessionRepo, jwtManger)
 	grpcauth.Register(gRPCServer.Server(), authService)
 
 	gRPCServer.Start()

@@ -114,6 +114,57 @@ func (r *UserRepo) Create(ctx context.Context, user *domain.User) error {
 	return nil
 }
 
+func (r *UserRepo) UserByID(ctx context.Context, userID uuid.UUID) (*domain.User, error) {
+	const query = `
+		SELECT id, email, name, password_hash, is_verified
+		FROM users
+		WHERE id = $1
+	`
+
+	var (
+		id           uuid.UUID
+		rawEmail     string
+		rawName      string
+		passwordHash string
+		isVerified   bool
+	)
+
+	err := r.db.QueryRow(ctx, query, userID).Scan(
+		&id,
+		&rawEmail,
+		&rawName,
+		&passwordHash,
+		&isVerified,
+	)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domain.ErrUserNotFound
+		}
+		return nil, err
+	}
+
+	emailVO, err := domain.NewEmail(rawEmail)
+	if err != nil {
+		return nil, err
+	}
+
+	nameVO, err := domain.NewUsername(rawName)
+	if err != nil {
+		return nil, err
+	}
+
+	user := domain.NewUser(
+		id,
+		emailVO,
+		nameVO,
+		domain.NewPasswordFromHash(passwordHash),
+		isVerified,
+	)
+
+	return user, nil
+}
+
 func (r *UserRepo) Verify(ctx context.Context, userID uuid.UUID) error {
 	const query = `
 		UPDATE users

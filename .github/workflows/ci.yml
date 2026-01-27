@@ -22,6 +22,12 @@ jobs:
         with:
           go-version: '1.25.5'
 
+      - name: Download dependencies
+        working-directory: ${{ matrix.work_dir }}
+        run: |
+          go mod download
+          go mod tidy
+
       - name: Build
         working-directory: ${{ matrix.work_dir }}
         run: |
@@ -50,6 +56,12 @@ jobs:
         with:
           go-version: '1.25.5'
 
+      - name: Download dependencies
+        working-directory: ${{ matrix.work_dir }}
+        run: |
+          go mod download
+          go mod tidy
+
       - name: Build
         working-directory: ${{ matrix.work_dir }}
         run: |
@@ -77,6 +89,12 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.25.5'
+
+      - name: Download dependencies
+        working-directory: ${{ matrix.work_dir }}
+        run: |
+          go mod download
+          go mod tidy
 
       - name: Build
         working-directory: ${{ matrix.work_dir }}

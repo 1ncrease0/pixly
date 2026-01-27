@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -22,32 +23,30 @@ var (
 )
 
 type Manager struct {
-	secret string
-	ttl    time.Duration
+	secret     string
+	accessTTL  time.Duration
+	refreshTTL time.Duration
 }
 
-func NewManager(secret string, ttl time.Duration) (*Manager, error) {
-	if secret == "" {
-		return nil, ErrEmptySigningKey
+func NewManager(secret string, accessTTL time.Duration, refreshTTL time.Duration) Manager {
+	return Manager{
+		secret:     secret,
+		accessTTL:  accessTTL,
+		refreshTTL: refreshTTL,
 	}
-
-	return &Manager{
-		secret: secret,
-		ttl:    ttl,
-	}, nil
 }
 
 type AccessClaims struct {
-	UserID string `json:"id"`
+	UserID uuid.UUID `json:"id"`
 	jwt.RegisteredClaims
 }
 
-func (m *Manager) NewJWT(userID string) (string, error) {
+func (m *Manager) NewJWT(userID uuid.UUID) (string, error) {
 	now := time.Now()
 	claims := AccessClaims{
 		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(now.Add(m.ttl)),
+			ExpiresAt: jwt.NewNumericDate(now.Add(m.accessTTL)),
 			IssuedAt:  jwt.NewNumericDate(now),
 			NotBefore: jwt.NewNumericDate(now),
 		},
@@ -58,7 +57,7 @@ func (m *Manager) NewJWT(userID string) (string, error) {
 }
 
 type Info struct {
-	UserID string
+	UserID uuid.UUID
 }
 
 func (m *Manager) Parse(accessToken string) (*Info, error) {
@@ -84,7 +83,7 @@ func (m *Manager) Parse(accessToken string) (*Info, error) {
 		return nil, ErrClaimsNotFound
 	}
 
-	if claims.UserID == "" {
+	if claims.UserID == uuid.Nil {
 		return nil, ErrUserIDNotFound
 	}
 
@@ -100,6 +99,10 @@ func (m *Manager) NewRefreshToken() (string, error) {
 	}
 
 	return fmt.Sprintf("%x", b), nil
+}
+
+func (m *Manager) RefreshTTL() time.Duration {
+	return m.refreshTTL
 }
 
 func HashRefreshToken(token string) string {
