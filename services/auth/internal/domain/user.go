@@ -12,6 +12,7 @@ var (
 	ErrNilUser                  = errors.New("nil user")
 	ErrVerificationCodeNotFound = errors.New("verification not found")
 	ErrUserAlreadyVerified      = errors.New("user already verified")
+	ErrUserNotVerified          = errors.New("user not verified")
 )
 
 type User struct {

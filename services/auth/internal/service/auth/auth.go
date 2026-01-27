@@ -85,6 +85,10 @@ func (s *AuthService) Login(ctx context.Context, email domain.Email, password do
 		return nil, err
 	}
 
+	if !u.IsVerified() {
+		return nil, domain.ErrUserNotVerified
+	}
+
 	if u.PasswordHash() != password.Hash() {
 		return nil, domain.ErrInvalidPassword
 	}
@@ -126,6 +130,10 @@ func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (*domain
 	user, err := s.userRepo.UserByID(ctx, session.UserID)
 	if err != nil {
 		return nil, err
+	}
+
+	if !user.IsVerified() {
+		return nil, domain.ErrUserNotVerified
 	}
 
 	accessToken, err := s.jwtManger.NewJWT(user.ID())
@@ -178,4 +186,16 @@ func (s *AuthService) sendVerification(ctx context.Context, u *domain.User) erro
 		Code:  code.String(),
 	}
 	return s.sender.SendVerification(ctx, e)
+}
+
+func (s *AuthService) User(ctx context.Context, id uuid.UUID) (*domain.User, error) {
+	user, err := s.userRepo.UserByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if !user.IsVerified() {
+		return nil, domain.ErrUserNotVerified
+	}
+
+	return user, nil
 }
