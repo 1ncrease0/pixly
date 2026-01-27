@@ -22,6 +22,11 @@ jobs:
         with:
           go-version: '1.25.5'
 
+      - name: Initialize workspace
+        run: |
+          go work init ./pkg/grpcserver ./pkg/httpserver ./pkg/jwt ./pkg/logger ./proto ./services/auth ./services/gateway ./services/notification
+          go work sync
+
       - name: Download dependencies
         working-directory: ${{ matrix.work_dir }}
         run: |
@@ -56,6 +61,11 @@ jobs:
         with:
           go-version: '1.25.5'
 
+      - name: Initialize workspace
+        run: |
+          go work init ./pkg/grpcserver ./pkg/httpserver ./pkg/jwt ./pkg/logger ./proto ./services/auth ./services/gateway ./services/notification
+          go work sync
+
       - name: Download dependencies
         working-directory: ${{ matrix.work_dir }}
         run: |
@@ -89,6 +99,11 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.25.5'
+
+      - name: Initialize workspace
+        run: |
+          go work init ./pkg/grpcserver ./pkg/httpserver ./pkg/jwt ./pkg/logger ./proto ./services/auth ./services/gateway ./services/notification
+          go work sync
 
       - name: Download dependencies
         working-directory: ${{ matrix.work_dir }}
