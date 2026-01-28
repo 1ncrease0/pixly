@@ -59,7 +59,7 @@ func main() {
 	sessionRepo := postgres.NewSessionRepo(pg.Pool)
 	jwtManger := jwt.NewManager(cfg.JWT.Secret, cfg.JWT.AccessTTL, cfg.JWT.RefreshTTL)
 	authService := auth.NewAuthService(userRepo, verificationRepo, producer, sessionRepo, jwtManger)
-	grpcauth.Register(gRPCServer.Server(), authService)
+	grpcauth.Register(gRPCServer.Server(), authService, log)
 
 	gRPCServer.Start()
 	defer gRPCServer.Shutdown()

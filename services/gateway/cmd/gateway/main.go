@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"github.com/1ncrease0/pixly/pkg/httpserver"
+	"github.com/1ncrease0/pixly/pkg/jwt"
 	"github.com/1ncrease0/pixly/pkg/logger"
 	"github.com/1ncrease0/pixly/services/gateway/internal/config"
 	"github.com/1ncrease0/pixly/services/gateway/internal/infra/api"
@@ -24,10 +25,14 @@ func main() {
 	}
 	defer func() {
 		err = authClient.Close()
-		log.Error("failed to close auth client", slog.Any("error", err))
+		if err != nil {
+			log.Error("failed to close auth client", slog.Any("error", err))
+		}
 	}()
 
-	router := api.InitRoutes(cfg, log, authClient)
+	jwtManager := jwt.NewManager(cfg.JWT.Secret, cfg.JWT.AccessTTL, cfg.JWT.RefreshTTL)
+
+	router := api.InitRoutes(cfg, log, authClient, jwtManager)
 	httpServer := httpserver.New(
 		httpserver.Params{
 			Addr:            cfg.HTTP.Host + ":" + strconv.Itoa(cfg.HTTP.Port),
@@ -42,7 +47,9 @@ func main() {
 	httpServer.Start()
 	defer func() {
 		err = httpServer.Shutdown()
-		log.Error("failed to shutdown http server", slog.Any("error", err))
+		if err != nil {
+			log.Error("failed to shutdown http server", slog.Any("error", err))
+		}
 	}()
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)

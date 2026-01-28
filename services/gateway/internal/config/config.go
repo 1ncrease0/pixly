@@ -11,6 +11,7 @@ type Config struct {
 	Env     string  `yaml:"env" env-default:"local"`
 	HTTP    HTTP    `yaml:"http_server"`
 	Clients Clients `yaml:"clients"`
+	JWT     JWT     `yaml:"jwt"`
 }
 
 type Clients struct {
@@ -40,6 +41,12 @@ type CORS struct {
 	AllowedHeaders   []string      `yaml:"allowed_headers"`
 	AllowCredentials bool          `yaml:"allow_credentials"`
 	MaxAge           time.Duration `yaml:"max_age"`
+}
+
+type JWT struct {
+	Secret     string        `yaml:"secret_key" env-required:"true"`
+	AccessTTL  time.Duration `yaml:"access_ttl" env-default:"5m"`
+	RefreshTTL time.Duration `yaml:"refresh_ttl" env-default:"1h"`
 }
 
 func MustLoad() *Config {

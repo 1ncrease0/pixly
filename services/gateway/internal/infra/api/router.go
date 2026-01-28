@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/1ncrease0/pixly/pkg/jwt"
 	"github.com/1ncrease0/pixly/services/gateway/internal/config"
 	"github.com/1ncrease0/pixly/services/gateway/internal/infra/api/handlers/auth"
 	"github.com/1ncrease0/pixly/services/gateway/internal/infra/api/handlers/healthcheck"
@@ -10,7 +11,7 @@ import (
 	"log/slog"
 )
 
-func InitRoutes(cfg *config.Config, log *slog.Logger, authClient auth.AuthClient) *gin.Engine {
+func InitRoutes(cfg *config.Config, log *slog.Logger, authClient auth.AuthClient, m *jwt.Manager) *gin.Engine {
 	r := gin.New()
 	r.Use(middleware.Logging(log))
 	r.Use(gin.Recovery())
@@ -28,6 +29,7 @@ func InitRoutes(cfg *config.Config, log *slog.Logger, authClient auth.AuthClient
 	health := healthcheck.NewHandler()
 	auth := auth.NewHandler(log, authClient)
 
+	authMiddleware := middleware.Auth(m, log)
 	v1 := r.Group("api/v1", middleware.Logging(log))
 	{
 		v1.GET("/health", health.Health)
@@ -35,7 +37,12 @@ func InitRoutes(cfg *config.Config, log *slog.Logger, authClient auth.AuthClient
 		{
 			authentification.POST("/register", auth.Register)
 			authentification.POST("/verify", auth.VerifyEmail)
+			authentification.POST("/login", auth.Login)
+			authentification.POST("/refresh", auth.Refresh)
+			authentification.POST("/resend-verification", auth.ResendVerification)
 		}
+
+		v1.GET("/me", authMiddleware, auth.Me)
 	}
 	return r
 }

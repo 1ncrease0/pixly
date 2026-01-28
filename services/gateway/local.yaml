@@ -30,3 +30,9 @@ clients:
     addr: "localhost:50051"
     timeout: 5s
     retries: 1
+
+jwt:
+  secret_key: "secretkey"
+  access_ttl: 15m
+  refresh_ttl: 720h
+

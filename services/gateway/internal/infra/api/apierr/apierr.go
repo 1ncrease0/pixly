@@ -39,6 +39,10 @@ const (
 	UserAlreadyExists       Code = "USER_ALREADY_EXISTS"
 	UsernameTaken           Code = "USERNAME_TAKEN"
 	UserNotFound            Code = "USER_NOT_FOUND"
+	UserNotVerified         Code = "USER_NOT_VERIFIED"
+	Unauthenticated         Code = "UNAUTHENTICATED"
+	SessionNotFound         Code = "SESSION_NOT_FOUND"
+	SessionExpired          Code = "SESSION_EXPIRED"
 	InternalError           Code = "INTERNAL_ERROR"
 )
 
@@ -58,6 +62,16 @@ func ErrorToResponse(err error) ErrorResponse {
 		return NewErrorResponse(http.StatusBadRequest, InvalidVerificationCode, "Invalid or expired verification code", "code")
 	case errors.Is(err, domain.ErrUserNotFound):
 		return NewErrorResponse(http.StatusNotFound, UserNotFound, "User not found", "")
+	case errors.Is(err, domain.ErrUserNotVerified):
+		return NewErrorResponse(http.StatusPreconditionFailed, UserNotVerified, "User email is not verified", "email")
+	case errors.Is(err, domain.ErrUnauthenticated):
+		return NewErrorResponse(http.StatusUnauthorized, Unauthenticated, "Invalid email or password", "")
+	case errors.Is(err, domain.ErrSessionNotFound):
+		return NewErrorResponse(http.StatusUnauthorized, SessionNotFound, "Invalid refresh token", "")
+	case errors.Is(err, domain.ErrSessionExpired):
+		return NewErrorResponse(http.StatusUnauthorized, SessionExpired, "Refresh token expired", "")
+	case errors.Is(err, domain.ErrInvalidArgument):
+		return NewErrorResponse(http.StatusBadRequest, BadRequest, "Invalid argument", "")
 	default:
 		return NewErrorResponse(http.StatusInternalServerError, InternalError, "Internal server error", "")
 	}
