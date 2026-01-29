@@ -7,4 +7,4 @@ rabbitmq:
 
 email:
   from: 'no-reply@pixly.com'
-  base: 'localhost:8080'
+  base: 'http://localhost:4000/api/v1/auth/verify?token='
