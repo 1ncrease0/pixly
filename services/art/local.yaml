@@ -1,0 +1,7 @@
+env: "local"
+
+grpc:
+  port: 50052
+
+postgres:
+  dsn: "postgres://postgres:123456@localhost:5433/art?sslmode=disable"

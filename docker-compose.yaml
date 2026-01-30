@@ -14,6 +14,38 @@ services:
     networks:
       - pixly
 
+  art_postgres:
+    container_name: art_postgres
+    image: postgres:17
+    restart: always
+    environment:
+      POSTGRES_DB: ${ART_POSTGRES_DB}
+      POSTGRES_USER: ${ART_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${ART_POSTGRES_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - art_pgdata:/var/lib/postgresql/data
+    networks:
+      - pixly
+
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    restart: always
+    command: server /data --console-address "0.0.0.0:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - pixly
+
   auth_redis:
     image: redis:7
     container_name: auth_redis
@@ -43,8 +75,11 @@ services:
 
 volumes:
   auth_pgdata:
+  art_pgdata:
   auth_redis_data:
   rabbitmq_data:
+  minio_data:
+
 
 
 networks:
