@@ -2,6 +2,7 @@ package minio
 
 import (
 	"context"
+
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
@@ -38,11 +39,13 @@ func (m *MinIO) ensureBuckets(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
+
 		if !exists {
 			if err := m.Client.MakeBucket(ctx, bucket, minio.MakeBucketOptions{}); err != nil {
 				return err
 			}
 		}
 	}
+
 	return nil
 }

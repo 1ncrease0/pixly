@@ -10,9 +10,7 @@ const (
 	maxTitleLength = 32
 )
 
-var (
-	ErrTitleLength = errors.New("invalid title length")
-)
+var ErrTitleLength = errors.New("invalid title length")
 
 type Color struct {
 	rgba color.RGBA
@@ -42,6 +40,7 @@ func NewTitle(title string) (Title, error) {
 	if len(title) > maxTitleLength {
 		return Title{}, ErrTitleLength
 	}
+
 	return Title{title: title}, nil
 }
 
