@@ -1,0 +1,469 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/api/v1/auth/login": {
+            "post": {
+                "description": "Authenticate by email and password. Returns access_token and refresh_token.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Login",
+                "parameters": [
+                    {
+                        "description": "Email and password",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_infra_api_handlers_auth.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_infra_api_handlers_auth.TokenPairResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "UNAUTHENTICATED",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    },
+                    "412": {
+                        "description": "USER_NOT_VERIFIED",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/refresh": {
+            "post": {
+                "description": "Issue new access and refresh tokens using a valid refresh_token.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Refresh tokens",
+                "parameters": [
+                    {
+                        "description": "Refresh token",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_infra_api_handlers_auth.RefreshRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_infra_api_handlers_auth.TokenPairResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "SESSION_NOT_FOUND, SESSION_EXPIRED",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/register": {
+            "post": {
+                "description": "Register a new user. A verification email is sent to the given address.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Register new user",
+                "parameters": [
+                    {
+                        "description": "Registration data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_infra_api_handlers_auth.RegisterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_infra_api_handlers_auth.RegisterResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "BAD_REQUEST, INVALID_EMAIL, INVALID_USERNAME, INVALID_PASSWORD",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "USER_ALREADY_EXISTS, USERNAME_TAKEN",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/resend-verification": {
+            "post": {
+                "description": "Resend the verification email to the given address.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Resend verification email",
+                "parameters": [
+                    {
+                        "description": "User email",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_infra_api_handlers_auth.ResendVerificationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_infra_api_handlers_auth.MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "USER_NOT_FOUND",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/verify": {
+            "post": {
+                "description": "Confirm email using the token from the verification email (query param token).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Verify email",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Verification token from email",
+                        "name": "token",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_infra_api_handlers_auth.MessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "INVALID_VERIFICATION_CODE",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/health": {
+            "get": {
+                "description": "Returns service status and current time in RFC3339.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Health check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_infra_api_handlers_healthcheck.HealthResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/me": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Return the authenticated user. Requires Authorization: Bearer \u0026lt;access_token\u0026gt;.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Current user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_infra_api_handlers_auth.MeResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "UNAUTHENTICATED",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.Code": {
+            "type": "string",
+            "enum": [
+                "BAD_REQUEST",
+                "INVALID_EMAIL",
+                "INVALID_USERNAME",
+                "INVALID_PASSWORD",
+                "INVALID_VERIFICATION_CODE",
+                "USER_ALREADY_EXISTS",
+                "USERNAME_TAKEN",
+                "USER_NOT_FOUND",
+                "USER_NOT_VERIFIED",
+                "UNAUTHENTICATED",
+                "SESSION_NOT_FOUND",
+                "SESSION_EXPIRED",
+                "INTERNAL_ERROR"
+            ],
+            "x-enum-varnames": [
+                "BadRequest",
+                "InvalidEmail",
+                "InvalidUsername",
+                "InvalidPassword",
+                "InvalidVerificationCode",
+                "UserAlreadyExists",
+                "UsernameTaken",
+                "UserNotFound",
+                "UserNotVerified",
+                "Unauthenticated",
+                "SessionNotFound",
+                "SessionExpired",
+                "InternalError"
+            ]
+        },
+        "github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorDetail": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.Code"
+                        }
+                    ],
+                    "example": "BAD_REQUEST"
+                },
+                "field": {
+                    "type": "string",
+                    "example": "email"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Invalid request body"
+                }
+            }
+        },
+        "github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorDetail"
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 400
+                }
+            }
+        },
+        "internal_infra_api_handlers_auth.LoginRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "password123"
+                }
+            }
+        },
+        "internal_infra_api_handlers_auth.MeResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "johndoe"
+                }
+            }
+        },
+        "internal_infra_api_handlers_auth.MessageResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Email verified successfully"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "internal_infra_api_handlers_auth.RefreshRequest": {
+            "type": "object",
+            "properties": {
+                "refresh_token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                }
+            }
+        },
+        "internal_infra_api_handlers_auth.RegisterRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "securePassword123"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "johndoe"
+                }
+            }
+        },
+        "internal_infra_api_handlers_auth.RegisterResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Registration successful, verification email sent"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "internal_infra_api_handlers_auth.ResendVerificationRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                }
+            }
+        },
+        "internal_infra_api_handlers_auth.TokenPairResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                },
+                "refresh_token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                }
+            }
+        },
+        "internal_infra_api_handlers_healthcheck.HealthResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "example": "ok"
+                },
+                "timestamp": {
+                    "type": "string",
+                    "example": "2024-01-01T12:00:00Z"
+                }
+            }
+        }
+    }
+}

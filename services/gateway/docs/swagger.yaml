@@ -1,0 +1,319 @@
+definitions:
+  github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.Code:
+    enum:
+    - BAD_REQUEST
+    - INVALID_EMAIL
+    - INVALID_USERNAME
+    - INVALID_PASSWORD
+    - INVALID_VERIFICATION_CODE
+    - USER_ALREADY_EXISTS
+    - USERNAME_TAKEN
+    - USER_NOT_FOUND
+    - USER_NOT_VERIFIED
+    - UNAUTHENTICATED
+    - SESSION_NOT_FOUND
+    - SESSION_EXPIRED
+    - INTERNAL_ERROR
+    type: string
+    x-enum-varnames:
+    - BadRequest
+    - InvalidEmail
+    - InvalidUsername
+    - InvalidPassword
+    - InvalidVerificationCode
+    - UserAlreadyExists
+    - UsernameTaken
+    - UserNotFound
+    - UserNotVerified
+    - Unauthenticated
+    - SessionNotFound
+    - SessionExpired
+    - InternalError
+  github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorDetail:
+    properties:
+      code:
+        allOf:
+        - $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.Code'
+        example: BAD_REQUEST
+      field:
+        example: email
+        type: string
+      message:
+        example: Invalid request body
+        type: string
+    type: object
+  github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse:
+    properties:
+      error:
+        $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorDetail'
+      status:
+        example: 400
+        type: integer
+    type: object
+  internal_infra_api_handlers_auth.LoginRequest:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      password:
+        example: password123
+        type: string
+    type: object
+  internal_infra_api_handlers_auth.MeResponse:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      username:
+        example: johndoe
+        type: string
+    type: object
+  internal_infra_api_handlers_auth.MessageResponse:
+    properties:
+      message:
+        example: Email verified successfully
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  internal_infra_api_handlers_auth.RefreshRequest:
+    properties:
+      refresh_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    type: object
+  internal_infra_api_handlers_auth.RegisterRequest:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+      password:
+        example: securePassword123
+        type: string
+      username:
+        example: johndoe
+        type: string
+    type: object
+  internal_infra_api_handlers_auth.RegisterResponse:
+    properties:
+      message:
+        example: Registration successful, verification email sent
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  internal_infra_api_handlers_auth.ResendVerificationRequest:
+    properties:
+      email:
+        example: user@example.com
+        type: string
+    type: object
+  internal_infra_api_handlers_auth.TokenPairResponse:
+    properties:
+      access_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      refresh_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    type: object
+  internal_infra_api_handlers_healthcheck.HealthResponse:
+    properties:
+      status:
+        example: ok
+        type: string
+      timestamp:
+        example: "2024-01-01T12:00:00Z"
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate by email and password. Returns access_token and refresh_token.
+      parameters:
+      - description: Email and password
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_infra_api_handlers_auth.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_infra_api_handlers_auth.TokenPairResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+        "401":
+          description: UNAUTHENTICATED
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+        "412":
+          description: USER_NOT_VERIFIED
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+      summary: Login
+      tags:
+      - auth
+  /api/v1/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Issue new access and refresh tokens using a valid refresh_token.
+      parameters:
+      - description: Refresh token
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_infra_api_handlers_auth.RefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_infra_api_handlers_auth.TokenPairResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+        "401":
+          description: SESSION_NOT_FOUND, SESSION_EXPIRED
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+      summary: Refresh tokens
+      tags:
+      - auth
+  /api/v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user. A verification email is sent to the given
+        address.
+      parameters:
+      - description: Registration data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_infra_api_handlers_auth.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_infra_api_handlers_auth.RegisterResponse'
+        "400":
+          description: BAD_REQUEST, INVALID_EMAIL, INVALID_USERNAME, INVALID_PASSWORD
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+        "409":
+          description: USER_ALREADY_EXISTS, USERNAME_TAKEN
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+      summary: Register new user
+      tags:
+      - auth
+  /api/v1/auth/resend-verification:
+    post:
+      consumes:
+      - application/json
+      description: Resend the verification email to the given address.
+      parameters:
+      - description: User email
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_infra_api_handlers_auth.ResendVerificationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_infra_api_handlers_auth.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+        "404":
+          description: USER_NOT_FOUND
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+      summary: Resend verification email
+      tags:
+      - auth
+  /api/v1/auth/verify:
+    post:
+      description: Confirm email using the token from the verification email (query
+        param token).
+      parameters:
+      - description: Verification token from email
+        in: query
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_infra_api_handlers_auth.MessageResponse'
+        "400":
+          description: INVALID_VERIFICATION_CODE
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+      summary: Verify email
+      tags:
+      - auth
+  /api/v1/health:
+    get:
+      description: Returns service status and current time in RFC3339.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_infra_api_handlers_healthcheck.HealthResponse'
+      summary: Health check
+      tags:
+      - health
+  /api/v1/me:
+    get:
+      description: 'Return the authenticated user. Requires Authorization: Bearer
+        &lt;access_token&gt;.'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_infra_api_handlers_auth.MeResponse'
+        "401":
+          description: UNAUTHENTICATED
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Current user
+      tags:
+      - auth
+swagger: "2.0"

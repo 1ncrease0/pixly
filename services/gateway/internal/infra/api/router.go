@@ -1,5 +1,13 @@
 package api
 
+// @title           Pixly Gateway API
+// @version         1.0
+// @description     Pixly gateway HTTP API.
+// @BasePath        /
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
 import (
 	"github.com/1ncrease0/pixly/pkg/jwt"
 	"github.com/1ncrease0/pixly/services/gateway/internal/config"
@@ -8,7 +16,11 @@ import (
 	"github.com/1ncrease0/pixly/services/gateway/internal/infra/api/middleware"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"log/slog"
+
+	_ "github.com/1ncrease0/pixly/services/gateway/docs"
 )
 
 func InitRoutes(cfg *config.Config, log *slog.Logger, authClient auth.AuthClient, m *jwt.Manager) *gin.Engine {
@@ -26,8 +38,10 @@ func InitRoutes(cfg *config.Config, log *slog.Logger, authClient auth.AuthClient
 		}))
 	}
 
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	health := healthcheck.NewHandler()
-	auth := auth.NewHandler(log, authClient)
+	authH := auth.NewHandler(log, authClient)
 
 	authMiddleware := middleware.Auth(m, log)
 	v1 := r.Group("api/v1", middleware.Logging(log))
@@ -35,14 +49,14 @@ func InitRoutes(cfg *config.Config, log *slog.Logger, authClient auth.AuthClient
 		v1.GET("/health", health.Health)
 		authentification := v1.Group("/auth")
 		{
-			authentification.POST("/register", auth.Register)
-			authentification.POST("/verify", auth.VerifyEmail)
-			authentification.POST("/login", auth.Login)
-			authentification.POST("/refresh", auth.Refresh)
-			authentification.POST("/resend-verification", auth.ResendVerification)
+			authentification.POST("/register", authH.Register)
+			authentification.POST("/verify", authH.VerifyEmail)
+			authentification.POST("/login", authH.Login)
+			authentification.POST("/refresh", authH.Refresh)
+			authentification.POST("/resend-verification", authH.ResendVerification)
 		}
 
-		v1.GET("/me", authMiddleware, auth.Me)
+		v1.GET("/me", authMiddleware, authH.Me)
 	}
 	return r
 }

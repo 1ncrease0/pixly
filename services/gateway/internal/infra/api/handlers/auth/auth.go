@@ -32,11 +32,27 @@ func NewHandler(log *slog.Logger, authClient AuthClient) *Handler {
 }
 
 type RegisterRequest struct {
-	Email    string `json:"email"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Email    string `json:"email" example:"user@example.com"`
+	Username string `json:"username" example:"johndoe"`
+	Password string `json:"password" example:"securePassword123"`
 }
 
+type RegisterResponse struct {
+	Success bool   `json:"success" example:"true"`
+	Message string `json:"message" example:"Registration successful, verification email sent"`
+}
+
+// Register godoc
+// @Summary      Register new user
+// @Description  Register a new user. A verification email is sent to the given address.
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body body RegisterRequest true "Registration data"
+// @Success      200 {object} RegisterResponse
+// @Failure      400 {object} apierr.ErrorResponse "BAD_REQUEST, INVALID_EMAIL, INVALID_USERNAME, INVALID_PASSWORD"
+// @Failure      409 {object} apierr.ErrorResponse "USER_ALREADY_EXISTS, USERNAME_TAKEN"
+// @Router       /api/v1/auth/register [post]
 func (h *Handler) Register(c *gin.Context) {
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -66,6 +82,20 @@ func (h *Handler) Register(c *gin.Context) {
 	})
 }
 
+type MessageResponse struct {
+	Success bool   `json:"success" example:"true"`
+	Message string `json:"message" example:"Email verified successfully"`
+}
+
+// VerifyEmail godoc
+// @Summary      Verify email
+// @Description  Confirm email using the token from the verification email (query param token).
+// @Tags         auth
+// @Produce      json
+// @Param        token query string true "Verification token from email"
+// @Success      200 {object} MessageResponse
+// @Failure      400 {object} apierr.ErrorResponse "INVALID_VERIFICATION_CODE"
+// @Router       /api/v1/auth/verify [post]
 func (h *Handler) VerifyEmail(c *gin.Context) {
 	code := c.Query("token")
 	if code == "" {
@@ -96,10 +126,27 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 }
 
 type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" example:"user@example.com"`
+	Password string `json:"password" example:"password123"`
 }
 
+type TokenPairResponse struct {
+	AccessToken  string `json:"access_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
+	RefreshToken string `json:"refresh_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
+}
+
+// Login godoc
+// @Summary      Login
+// @Description  Authenticate by email and password. Returns access_token and refresh_token.
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body body LoginRequest true "Email and password"
+// @Success      200 {object} TokenPairResponse
+// @Failure      400 {object} apierr.ErrorResponse
+// @Failure      401 {object} apierr.ErrorResponse "UNAUTHENTICATED"
+// @Failure      412 {object} apierr.ErrorResponse "USER_NOT_VERIFIED"
+// @Router       /api/v1/auth/login [post]
 func (h *Handler) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -130,9 +177,20 @@ func (h *Handler) Login(c *gin.Context) {
 }
 
 type RefreshRequest struct {
-	RefreshToken string `json:"refresh_token"`
+	RefreshToken string `json:"refresh_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
 }
 
+// Refresh godoc
+// @Summary      Refresh tokens
+// @Description  Issue new access and refresh tokens using a valid refresh_token.
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body body RefreshRequest true "Refresh token"
+// @Success      200 {object} TokenPairResponse
+// @Failure      400 {object} apierr.ErrorResponse
+// @Failure      401 {object} apierr.ErrorResponse "SESSION_NOT_FOUND, SESSION_EXPIRED"
+// @Router       /api/v1/auth/refresh [post]
 func (h *Handler) Refresh(c *gin.Context) {
 	var req RefreshRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -163,9 +221,20 @@ func (h *Handler) Refresh(c *gin.Context) {
 }
 
 type ResendVerificationRequest struct {
-	Email string `json:"email"`
+	Email string `json:"email" example:"user@example.com"`
 }
 
+// ResendVerification godoc
+// @Summary      Resend verification email
+// @Description  Resend the verification email to the given address.
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body body ResendVerificationRequest true "User email"
+// @Success      200 {object} MessageResponse
+// @Failure      400 {object} apierr.ErrorResponse
+// @Failure      404 {object} apierr.ErrorResponse "USER_NOT_FOUND"
+// @Router       /api/v1/auth/resend-verification [post]
 func (h *Handler) ResendVerification(c *gin.Context) {
 	var req ResendVerificationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -195,6 +264,21 @@ func (h *Handler) ResendVerification(c *gin.Context) {
 	})
 }
 
+type MeResponse struct {
+	ID       string `json:"id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	Email    string `json:"email" example:"user@example.com"`
+	Username string `json:"username" example:"johndoe"`
+}
+
+// Me godoc
+// @Summary      Current user
+// @Description  Return the authenticated user. Requires Authorization: Bearer &lt;access_token&gt;.
+// @Tags         auth
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200 {object} MeResponse
+// @Failure      401 {object} apierr.ErrorResponse "UNAUTHENTICATED"
+// @Router       /api/v1/me [get]
 func (h *Handler) Me(c *gin.Context) {
 	userIDVal, ok := c.Get(middleware.UserIDKey)
 	if !ok {

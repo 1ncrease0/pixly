@@ -8,7 +8,7 @@ import (
 
 type ErrorResponse struct {
 	Error  ErrorDetail `json:"error"`
-	Status int
+	Status int         `json:"status" example:"400"`
 }
 
 func NewErrorResponse(status int, code Code, message, field string) ErrorResponse {
@@ -23,9 +23,9 @@ func NewErrorResponse(status int, code Code, message, field string) ErrorRespons
 }
 
 type ErrorDetail struct {
-	Code    Code   `json:"code"`
-	Message string `json:"message"`
-	Field   string `json:"field,omitempty"`
+	Code    Code   `json:"code" example:"BAD_REQUEST"`
+	Message string `json:"message" example:"Invalid request body"`
+	Field   string `json:"field,omitempty" example:"email"`
 }
 
 type Code string
