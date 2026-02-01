@@ -1,5 +1,3 @@
-github.com/1ncrease0/pixly/pkg/logger v0.0.0-20260118145235-7183e6521342 h1:Hvz1ThJ8WfFhTZyNlAIdZz5Igch3v1psQ0x2BsVFmMg=
-github.com/1ncrease0/pixly/pkg/logger v0.0.0-20260118145235-7183e6521342/go.mod h1:m79s/zjGk5nkIAwToFoSiUxkKLjlOxaRm+TNwDUOnCs=
 github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak=
 github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=

@@ -14,6 +14,12 @@ require (
 	google.golang.org/grpc v1.78.0
 )
 
+replace (
+	github.com/1ncrease0/pixly/pkg/httpserver => ../../pkg/httpserver
+	github.com/1ncrease0/pixly/pkg/logger => ../../pkg/logger
+	github.com/1ncrease0/pixly/proto => ../../proto
+)
+
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/bytedance/sonic v1.14.0 // indirect

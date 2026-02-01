@@ -17,6 +17,13 @@ require (
 	google.golang.org/grpc v1.78.0
 )
 
+replace (
+	github.com/1ncrease0/pixly/pkg/grpcserver => ../../pkg/grpcserver
+	github.com/1ncrease0/pixly/pkg/jwt => ../../pkg/jwt
+	github.com/1ncrease0/pixly/pkg/logger => ../../pkg/logger
+	github.com/1ncrease0/pixly/proto => ../../proto
+)
+
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
