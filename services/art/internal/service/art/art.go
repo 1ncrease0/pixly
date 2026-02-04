@@ -34,10 +34,11 @@ type Service struct {
 	log           *slog.Logger
 }
 
-func NewService(r PixelartRepo, p ImageProvider) *Service {
+func NewService(r PixelartRepo, p ImageProvider, log *slog.Logger) *Service {
 	return &Service{
 		imageProvider: p,
 		repo:          r,
+		log:           log,
 	}
 }
 

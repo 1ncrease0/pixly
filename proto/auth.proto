@@ -2,7 +2,7 @@
 
   package auth;
 
-  option go_package = "pixly.auth.v1;authv1";
+  option go_package = "github.com/1ncrease0/pixly/proto/gen/auth;authv1";
 
   service Auth {
     rpc Register(RegisterRequest) returns (RegisterResponse);

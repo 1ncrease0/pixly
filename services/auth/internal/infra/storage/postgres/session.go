@@ -27,11 +27,11 @@ func (r *SessionRepo) CreateSession(ctx context.Context, session *domain.Session
 	}
 
 	const query = `
-		INSERT INTO refresh_tokens (token_hash, expires_at, created_at)
-		VALUES ($1, $2, $3)
+		INSERT INTO refresh_tokens (user_id, token_hash, expires_at, created_at)
+		VALUES ($1, $2, $3, $4)
 	`
 
-	_, err := r.db.Exec(ctx, query, session.TokenHash, session.ExpiresAt, session.CreatedAt)
+	_, err := r.db.Exec(ctx, query, session.UserID, session.TokenHash, session.ExpiresAt, session.CreatedAt)
 	if err != nil {
 		return err
 	}

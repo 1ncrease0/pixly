@@ -36,7 +36,7 @@ func main() {
 	defer func() {
 		err = rds.Close()
 		if err != nil {
-			slog.Any("error", err)
+			log.Error("failed to close redis", slog.Any("error", err))
 		}
 	}()
 
@@ -48,7 +48,7 @@ func main() {
 	defer func() {
 		err = producer.Close()
 		if err != nil {
-			slog.Any("error", err)
+			log.Error("failed to close rabbitmq", slog.Any("error", err))
 		}
 	}()
 
@@ -57,8 +57,8 @@ func main() {
 	verificationRepo := redis.NewVerificationRepo(rds.Client, cfg.Verification.TTL)
 	userRepo := postgres.NewUserRepo(pg.Pool)
 	sessionRepo := postgres.NewSessionRepo(pg.Pool)
-	jwtManger := jwt.NewManager(cfg.JWT.Secret, cfg.JWT.AccessTTL, cfg.JWT.RefreshTTL)
-	authService := auth.NewAuthService(userRepo, verificationRepo, producer, sessionRepo, jwtManger)
+	jwtManager := jwt.NewManager(cfg.JWT.Secret, cfg.JWT.AccessTTL, cfg.JWT.RefreshTTL)
+	authService := auth.NewAuthService(userRepo, verificationRepo, producer, sessionRepo, jwtManager)
 	grpcauth.Register(gRPCServer.Server(), authService, log)
 
 	gRPCServer.Start()

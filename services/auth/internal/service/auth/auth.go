@@ -37,7 +37,7 @@ type AuthService struct {
 	verificationRepo VerificationRepo
 	sender           VerificationSender
 	sessionRepo      SessionRepo
-	jwtManger        *jwt.Manager
+	jwtManager       *jwt.Manager
 }
 
 func NewAuthService(
@@ -52,7 +52,7 @@ func NewAuthService(
 		verificationRepo: verificationRepo,
 		sender:           sender,
 		sessionRepo:      sessionRepo,
-		jwtManger:        m,
+		jwtManager:       m,
 	}
 }
 
@@ -93,11 +93,11 @@ func (s *AuthService) Login(ctx context.Context, email domain.Email, password do
 		return nil, domain.ErrInvalidPassword
 	}
 
-	access, err := s.jwtManger.NewJWT(u.ID())
+	access, err := s.jwtManager.NewJWT(u.ID())
 	if err != nil {
 		return nil, err
 	}
-	refresh, err := s.jwtManger.NewRefreshToken()
+	refresh, err := s.jwtManager.NewRefreshToken()
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +110,7 @@ func (s *AuthService) Login(ctx context.Context, email domain.Email, password do
 		UserID:    u.ID(),
 		TokenHash: jwt.HashRefreshToken(refresh),
 		CreatedAt: time.Now(),
-		ExpiresAt: time.Now().Add(s.jwtManger.RefreshTTL()),
+		ExpiresAt: time.Now().Add(s.jwtManager.RefreshTTL()),
 	}
 	if err := s.sessionRepo.CreateSession(ctx, &session); err != nil {
 		return nil, err
@@ -136,12 +136,12 @@ func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (*domain
 		return nil, domain.ErrUserNotVerified
 	}
 
-	accessToken, err := s.jwtManger.NewJWT(user.ID())
+	accessToken, err := s.jwtManager.NewJWT(user.ID())
 	if err != nil {
 		return nil, err
 	}
 
-	newRefreshToken, err := s.jwtManger.NewRefreshToken()
+	newRefreshToken, err := s.jwtManager.NewRefreshToken()
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +152,7 @@ func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (*domain
 		UserID:    user.ID(),
 		TokenHash: jwt.HashRefreshToken(newRefreshToken),
 		CreatedAt: time.Now(),
-		ExpiresAt: time.Now().Add(s.jwtManger.RefreshTTL()),
+		ExpiresAt: time.Now().Add(s.jwtManager.RefreshTTL()),
 	}
 	if err := s.sessionRepo.CreateSession(ctx, &newSession); err != nil {
 		return nil, err

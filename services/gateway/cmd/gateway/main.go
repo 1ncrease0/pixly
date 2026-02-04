@@ -22,6 +22,7 @@ func main() {
 	authClient, err := auth.NewClient(cfg.Clients.Auth.Addr, cfg.Clients.Auth.Timeout, cfg.Clients.Auth.Retries, log)
 	if err != nil {
 		log.Error("failed to create auth client", slog.Any("error", err))
+		return
 	}
 	defer func() {
 		err = authClient.Close()
@@ -38,6 +39,7 @@ func main() {
 			Addr:            cfg.HTTP.Host + ":" + strconv.Itoa(cfg.HTTP.Port),
 			ReadTimeout:     cfg.HTTP.ReadTimeout,
 			WriteTimeout:    cfg.HTTP.WriteTimeout,
+			IdleTimeout:     cfg.HTTP.IdleTimeout,
 			ShutdownTimeout: cfg.HTTP.ShutdownTimeout,
 		},
 		router,
@@ -45,21 +47,18 @@ func main() {
 	)
 
 	httpServer.Start()
-	defer func() {
-		err = httpServer.Shutdown()
-		if err != nil {
-			log.Error("failed to shutdown http server", slog.Any("error", err))
-		}
-	}()
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
 	select {
 	case err := <-httpServer.Notify():
-		log.Error("grpc server error", slog.Any("error", err))
+		log.Error("http server error", slog.Any("error", err))
 	case <-ctx.Done():
 		log.Info("shutting down")
 	}
 
+	if err := httpServer.Shutdown(); err != nil {
+		log.Error("failed to shutdown http server", slog.Any("error", err))
+	}
 }

@@ -8,8 +8,8 @@ postgres:
 
 minio:
   endpoint: "localhost:9000"
-  access_key: "minioadmin"
-  secret_key: "minioadmin"
+  access_key: "rootname"
+  secret_key: "password123"
   use_ssl: false
   buckets: ["pixelarts"]
   presign_ttl: 1h

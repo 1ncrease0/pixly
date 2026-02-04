@@ -648,7 +648,7 @@ const file_auth_proto_rawDesc = "" +
 	"\x05Login\x12\x12.auth.LoginRequest\x1a\x13.auth.LoginResponse\x126\n" +
 	"\aRefresh\x12\x14.auth.RefreshRequest\x1a\x15.auth.RefreshResponse\x126\n" +
 	"\aGetUser\x12\x14.auth.GetUserRequest\x1a\x15.auth.GetUserResponse\x12W\n" +
-	"\x12ResendVerification\x12\x1f.auth.ResendVerificationRequest\x1a .auth.ResendVerificationResponseB\x16Z\x14pixly.auth.v1;authv1b\x06proto3"
+	"\x12ResendVerification\x12\x1f.auth.ResendVerificationRequest\x1a .auth.ResendVerificationResponseB2Z0github.com/1ncrease0/pixly/proto/gen/auth;authv1b\x06proto3"
 
 var (
 	file_auth_proto_rawDescOnce sync.Once

@@ -7,6 +7,7 @@ var (
 	ErrUsernameTaken           = errors.New("username taken")
 	ErrUserNotFound            = errors.New("user not found")
 	ErrUserNotVerified         = errors.New("user not verified")
+	ErrUserAlreadyVerified     = errors.New("user already verified")
 	ErrInvalidVerificationCode = errors.New("invalid verification code")
 	ErrInvalidPassword         = errors.New("invalid password")
 	ErrInvalidEmail            = errors.New("invalid email")

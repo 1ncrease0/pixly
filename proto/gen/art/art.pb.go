@@ -411,12 +411,12 @@ func (x *GetUserPixelartRequest) GetUserId() string {
 
 type GetUserPixelartResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Palette       []string               `protobuf:"bytes,2,rep,name=palette,proto3" json:"palette,omitempty"`
-	Pixels        []int64                `protobuf:"varint,3,rep,packed,name=pixels,proto3" json:"pixels,omitempty"`
-	Width         int64                  `protobuf:"varint,4,opt,name=width,proto3" json:"width,omitempty"`
-	Height        int64                  `protobuf:"varint,5,opt,name=height,proto3" json:"height,omitempty"`
-	Title         string                 `protobuf:"bytes,6,opt,name=title,proto3" json:"title,omitempty"`
-	ImageUrl      string                 `protobuf:"bytes,7,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
+	Palette       []string               `protobuf:"bytes,1,rep,name=palette,proto3" json:"palette,omitempty"`
+	Pixels        []int64                `protobuf:"varint,2,rep,packed,name=pixels,proto3" json:"pixels,omitempty"`
+	Width         int64                  `protobuf:"varint,3,opt,name=width,proto3" json:"width,omitempty"`
+	Height        int64                  `protobuf:"varint,4,opt,name=height,proto3" json:"height,omitempty"`
+	Title         string                 `protobuf:"bytes,5,opt,name=title,proto3" json:"title,omitempty"`
+	ImageUrl      string                 `protobuf:"bytes,6,opt,name=image_url,json=imageUrl,proto3" json:"image_url,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -675,12 +675,12 @@ const file_art_proto_rawDesc = "" +
 	"pixelartId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\"\xac\x01\n" +
 	"\x17GetUserPixelartResponse\x12\x18\n" +
-	"\apalette\x18\x02 \x03(\tR\apalette\x12\x16\n" +
-	"\x06pixels\x18\x03 \x03(\x03R\x06pixels\x12\x14\n" +
-	"\x05width\x18\x04 \x01(\x03R\x05width\x12\x16\n" +
-	"\x06height\x18\x05 \x01(\x03R\x06height\x12\x14\n" +
-	"\x05title\x18\x06 \x01(\tR\x05title\x12\x1b\n" +
-	"\timage_url\x18\a \x01(\tR\bimageUrl\"1\n" +
+	"\apalette\x18\x01 \x03(\tR\apalette\x12\x16\n" +
+	"\x06pixels\x18\x02 \x03(\x03R\x06pixels\x12\x14\n" +
+	"\x05width\x18\x03 \x01(\x03R\x05width\x12\x16\n" +
+	"\x06height\x18\x04 \x01(\x03R\x06height\x12\x14\n" +
+	"\x05title\x18\x05 \x01(\tR\x05title\x12\x1b\n" +
+	"\timage_url\x18\x06 \x01(\tR\bimageUrl\"1\n" +
 	"\x16GetUserPreviewsRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\"]\n" +
 	"\aPreview\x12\x1f\n" +

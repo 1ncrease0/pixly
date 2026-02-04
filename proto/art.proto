@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package art;
 
-option go_package = "pixly.art.v1;artv1";
+option go_package = "github.com/1ncrease0/pixly/proto/gen/art;artv1";
 
 service Art {
   rpc SavePixelart(SavePixelartRequest) returns (SavePixelartResponse);
@@ -52,12 +52,12 @@ message GetUserPixelartRequest{
 }
 
 message GetUserPixelartResponse {
-  repeated string palette = 2;
-  repeated int64 pixels = 3;
-  int64 width = 4;
-  int64 height = 5;
-  string title = 6;
-  string image_url = 7;
+  repeated string palette = 1;
+  repeated int64 pixels = 2;
+  int64 width = 3;
+  int64 height = 4;
+  string title = 5;
+  string image_url = 6;
 
 }
 

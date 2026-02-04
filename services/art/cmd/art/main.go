@@ -38,7 +38,7 @@ func main() {
 	imageProvider := minio.NewImageProvider(m.Client, bucket, cfg.MinIO.PresignTTL)
 
 	pixelartRepo := postgres.NewPixelartRepo(pg.Pool)
-	artService := art.NewService(pixelartRepo, &imageProvider)
+	artService := art.NewService(pixelartRepo, &imageProvider, log)
 
 	gRPCServer := grpcserver.New(log, cfg.GRPC.Port)
 	grpcart.Register(gRPCServer.Server(), artService, log)

@@ -40,6 +40,7 @@ const (
 	UsernameTaken           Code = "USERNAME_TAKEN"
 	UserNotFound            Code = "USER_NOT_FOUND"
 	UserNotVerified         Code = "USER_NOT_VERIFIED"
+	UserAlreadyVerified     Code = "USER_ALREADY_VERIFIED"
 	Unauthenticated         Code = "UNAUTHENTICATED"
 	SessionNotFound         Code = "SESSION_NOT_FOUND"
 	SessionExpired          Code = "SESSION_EXPIRED"
@@ -64,6 +65,8 @@ func ErrorToResponse(err error) ErrorResponse {
 		return NewErrorResponse(http.StatusNotFound, UserNotFound, "User not found", "")
 	case errors.Is(err, domain.ErrUserNotVerified):
 		return NewErrorResponse(http.StatusPreconditionFailed, UserNotVerified, "User email is not verified", "email")
+	case errors.Is(err, domain.ErrUserAlreadyVerified):
+		return NewErrorResponse(http.StatusPreconditionFailed, UserAlreadyVerified, "User email is already verified", "email")
 	case errors.Is(err, domain.ErrUnauthenticated):
 		return NewErrorResponse(http.StatusUnauthorized, Unauthenticated, "Invalid email or password", "")
 	case errors.Is(err, domain.ErrSessionNotFound):

@@ -282,7 +282,7 @@ func (c *Client) ResendVerification(ctx context.Context, email string) error {
 		return domain.ErrUserNotFound
 	case codes.FailedPrecondition:
 		c.log.Info("resend verification failed: user already verified")
-		return domain.ErrUserNotVerified
+		return domain.ErrUserAlreadyVerified
 	case codes.Internal:
 		c.log.Error("resend verification failed: internal error", slog.String("message", st.Message()))
 		return fmt.Errorf("resend verification failed: %s", st.Message())

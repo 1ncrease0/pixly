@@ -35,6 +35,7 @@ func main() {
 	)
 	if err != nil {
 		log.Error("consumer init failed", slog.Any("error", err))
+		return
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
