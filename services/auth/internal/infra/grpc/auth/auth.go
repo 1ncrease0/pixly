@@ -52,7 +52,7 @@ func (s *Server) Login(ctx context.Context, req *authv1.LoginRequest) (*authv1.L
 	}
 
 	if len(violations) > 0 {
-		s.log.Warn("login validation failed", slog.String("email", req.Email), slog.Any("violations", violations))
+		s.log.Info("login validation failed", slog.String("email", req.Email), slog.Any("violations", violations))
 		st := status.New(codes.InvalidArgument, "validation failed")
 		br := &errdetails.BadRequest{
 			FieldViolations: violations,
@@ -90,13 +90,13 @@ func (s *Server) Login(ctx context.Context, req *authv1.LoginRequest) (*authv1.L
 }
 func (s *Server) GetUser(ctx context.Context, req *authv1.GetUserRequest) (*authv1.GetUserResponse, error) {
 	if req.Id == "" {
-		s.log.Warn("get user failed: empty user id")
+		s.log.Info("get user failed: empty user id")
 		return nil, status.Error(codes.InvalidArgument, "user id is required")
 	}
 
 	userID, err := uuid.Parse(req.Id)
 	if err != nil {
-		s.log.Warn("get user failed: invalid user id format", slog.String("id", req.Id), slog.Any("error", err))
+		s.log.Info("get user failed: invalid user id format", slog.String("id", req.Id), slog.Any("error", err))
 		return nil, status.Error(codes.InvalidArgument, "invalid user id")
 	}
 
@@ -127,7 +127,7 @@ func (s *Server) GetUser(ctx context.Context, req *authv1.GetUserRequest) (*auth
 
 func (s *Server) Refresh(ctx context.Context, req *authv1.RefreshRequest) (*authv1.RefreshResponse, error) {
 	if req.RefreshToken == "" {
-		s.log.Warn("refresh failed: empty refresh token")
+		s.log.Info("refresh failed: empty refresh token")
 		return nil, status.Error(codes.InvalidArgument, "refresh token is required")
 	}
 
@@ -143,7 +143,7 @@ func (s *Server) Refresh(ctx context.Context, req *authv1.RefreshRequest) (*auth
 			return nil, status.Error(codes.Unauthenticated, "refresh token expired")
 
 		case errors.Is(err, domain.ErrUserNotFound):
-			s.log.Warn("refresh failed: user not found")
+			s.log.Info("refresh failed: user not found")
 			return nil, status.Error(codes.NotFound, "user not found")
 
 		case errors.Is(err, domain.ErrUserNotVerified):
@@ -166,7 +166,7 @@ func (s *Server) Refresh(ctx context.Context, req *authv1.RefreshRequest) (*auth
 func (s *Server) ResendVerification(ctx context.Context, req *authv1.ResendVerificationRequest) (*authv1.ResendVerificationResponse, error) {
 	email, err := domain.NewEmail(req.Email)
 	if err != nil {
-		s.log.Warn("resend verification failed: invalid email format", slog.String("email", req.Email))
+		s.log.Info("resend verification failed: invalid email format", slog.String("email", req.Email))
 		st := status.New(codes.InvalidArgument, "validation failed")
 		br := &errdetails.BadRequest{
 			FieldViolations: []*errdetails.BadRequest_FieldViolation{
@@ -223,7 +223,7 @@ func (s *Server) Register(ctx context.Context, req *authv1.RegisterRequest) (*au
 	}
 
 	if len(violations) > 0 {
-		s.log.Warn("register validation failed", slog.String("email", req.Email), slog.String("username", req.Username), slog.Any("violations", violations))
+		s.log.Info("register validation failed", slog.String("email", req.Email), slog.String("username", req.Username), slog.Any("violations", violations))
 		st := status.New(codes.InvalidArgument, "validation failed")
 		br := &errdetails.BadRequest{
 			FieldViolations: violations,

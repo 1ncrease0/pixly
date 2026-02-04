@@ -231,7 +231,7 @@ func (c *Client) Refresh(ctx context.Context, refreshToken string) (*domain.Toke
 		c.log.Info("refresh failed: session not found or expired")
 		return nil, domain.ErrSessionNotFound
 	case codes.NotFound:
-		c.log.Warn("refresh failed: user not found")
+		c.log.Info("refresh failed: user not found")
 		return nil, domain.ErrUserNotFound
 	case codes.FailedPrecondition:
 		c.log.Info("refresh failed: user not verified")

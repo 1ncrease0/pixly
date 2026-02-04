@@ -56,7 +56,7 @@ type RegisterResponse struct {
 func (h *Handler) Register(c *gin.Context) {
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		h.log.Warn("register: invalid request body", slog.Any("error", err))
+		h.log.Info("register: invalid request body", slog.Any("error", err))
 		resp := apierr.NewErrorResponse(
 			http.StatusBadRequest,
 			apierr.BadRequest,
@@ -69,7 +69,6 @@ func (h *Handler) Register(c *gin.Context) {
 
 	err := h.authClient.Register(c.Request.Context(), req.Email, req.Username, req.Password)
 	if err != nil {
-		h.log.Debug("register failed", slog.String("email", req.Email), slog.String("username", req.Username), slog.Any("error", err))
 		resp := apierr.ErrorToResponse(err)
 		c.JSON(resp.Status, resp)
 		return
@@ -99,7 +98,7 @@ type MessageResponse struct {
 func (h *Handler) VerifyEmail(c *gin.Context) {
 	code := c.Query("token")
 	if code == "" {
-		h.log.Warn("verify email: missing token")
+		h.log.Info("verify email: missing token")
 		resp := apierr.NewErrorResponse(
 			http.StatusBadRequest,
 			apierr.BadRequest,
@@ -112,7 +111,6 @@ func (h *Handler) VerifyEmail(c *gin.Context) {
 
 	err := h.authClient.VerifyEmail(c.Request.Context(), code)
 	if err != nil {
-		h.log.Debug("verify email failed", slog.Any("error", err))
 		resp := apierr.ErrorToResponse(err)
 		c.JSON(resp.Status, resp)
 		return
@@ -150,7 +148,7 @@ type TokenPairResponse struct {
 func (h *Handler) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		h.log.Warn("login: invalid request body", slog.Any("error", err))
+		h.log.Info("login: invalid request body", slog.Any("error", err))
 		resp := apierr.NewErrorResponse(
 			http.StatusBadRequest,
 			apierr.BadRequest,
@@ -163,7 +161,6 @@ func (h *Handler) Login(c *gin.Context) {
 
 	tokens, err := h.authClient.Login(c.Request.Context(), req.Email, req.Password)
 	if err != nil {
-		h.log.Debug("login failed", slog.String("email", req.Email), slog.Any("error", err))
 		resp := apierr.ErrorToResponse(err)
 		c.JSON(resp.Status, resp)
 		return
@@ -194,7 +191,7 @@ type RefreshRequest struct {
 func (h *Handler) Refresh(c *gin.Context) {
 	var req RefreshRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		h.log.Warn("refresh: invalid request body", slog.Any("error", err))
+		h.log.Info("refresh: invalid request body", slog.Any("error", err))
 		resp := apierr.NewErrorResponse(
 			http.StatusBadRequest,
 			apierr.BadRequest,
@@ -207,7 +204,6 @@ func (h *Handler) Refresh(c *gin.Context) {
 
 	tokens, err := h.authClient.Refresh(c.Request.Context(), req.RefreshToken)
 	if err != nil {
-		h.log.Debug("refresh failed", slog.Any("error", err))
 		resp := apierr.ErrorToResponse(err)
 		c.JSON(resp.Status, resp)
 		return
@@ -238,7 +234,7 @@ type ResendVerificationRequest struct {
 func (h *Handler) ResendVerification(c *gin.Context) {
 	var req ResendVerificationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		h.log.Warn("resend verification: invalid request body", slog.Any("error", err))
+		h.log.Info("resend verification: invalid request body", slog.Any("error", err))
 		resp := apierr.NewErrorResponse(
 			http.StatusBadRequest,
 			apierr.BadRequest,
@@ -251,7 +247,6 @@ func (h *Handler) ResendVerification(c *gin.Context) {
 
 	err := h.authClient.ResendVerification(c.Request.Context(), req.Email)
 	if err != nil {
-		h.log.Debug("resend verification failed", slog.String("email", req.Email), slog.Any("error", err))
 		resp := apierr.ErrorToResponse(err)
 		c.JSON(resp.Status, resp)
 		return
@@ -282,7 +277,7 @@ type MeResponse struct {
 func (h *Handler) Me(c *gin.Context) {
 	userIDVal, ok := c.Get(middleware.UserIDKey)
 	if !ok {
-		h.log.Warn("me: userID not found in context")
+		h.log.Info("me: userID not found in context")
 		resp := apierr.NewErrorResponse(
 			http.StatusUnauthorized,
 			apierr.Unauthenticated,
@@ -295,7 +290,7 @@ func (h *Handler) Me(c *gin.Context) {
 
 	userID, _ := userIDVal.(string)
 	if userID == "" {
-		h.log.Warn("me: empty userID")
+		h.log.Info("me: empty userID")
 		resp := apierr.NewErrorResponse(
 			http.StatusUnauthorized,
 			apierr.Unauthenticated,
@@ -308,7 +303,6 @@ func (h *Handler) Me(c *gin.Context) {
 
 	user, err := h.authClient.GetUser(c.Request.Context(), userID)
 	if err != nil {
-		h.log.Debug("me: get user failed", slog.String("user_id", userID), slog.Any("error", err))
 		resp := apierr.ErrorToResponse(err)
 		c.JSON(resp.Status, resp)
 		return
