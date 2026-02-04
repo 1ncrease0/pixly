@@ -3,6 +3,8 @@ module github.com/1ncrease0/pixly/services/art
 go 1.25.5
 
 require (
+	github.com/1ncrease0/pixly/pkg/grpcserver v0.0.0-00010101000000-000000000000
+	github.com/1ncrease0/pixly/pkg/logger v0.0.0-00010101000000-000000000000
 	github.com/1ncrease0/pixly/proto v0.0.0-00010101000000-000000000000
 	github.com/google/uuid v1.6.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
@@ -16,6 +18,7 @@ require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.3 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
@@ -41,4 +44,8 @@ require (
 	olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3 // indirect
 )
 
-replace github.com/1ncrease0/pixly/proto => ../../proto
+replace (
+	github.com/1ncrease0/pixly/pkg/grpcserver => ../../pkg/grpcserver
+	github.com/1ncrease0/pixly/pkg/logger => ../../pkg/logger
+	github.com/1ncrease0/pixly/proto => ../../proto
+)

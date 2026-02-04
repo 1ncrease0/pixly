@@ -5,3 +5,11 @@ grpc:
 
 postgres:
   dsn: "postgres://postgres:123456@localhost:5433/art?sslmode=disable"
+
+minio:
+  endpoint: "localhost:9000"
+  access_key: "minioadmin"
+  secret_key: "minioadmin"
+  use_ssl: false
+  buckets: ["pixelarts"]
+  presign_ttl: 1h

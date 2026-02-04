@@ -11,13 +11,14 @@ import (
 type Config struct {
 	Env      string   `yaml:"env" env-default:"local"`
 	Postgres Postgres `yaml:"postgres"`
+	MinIO    MinIO    `yaml:"minio"`
 	GRPC     GRPC     `yaml:"grpc"`
 }
 
 type MinIO struct {
 	SecretKey  string        `yaml:"secret_key" env-required:"true"`
 	AccessKey  string        `yaml:"access_key" env-required:"true"`
-	UseSSL     bool          `yaml:"use_ssl" env-required:"true"`
+	UseSSL     bool          `yaml:"use_ssl"`
 	Endpoint   string        `yaml:"endpoint" env-required:"true"`
 	Buckets    []string      `yaml:"buckets" env-required:"true"`
 	PresignTTL time.Duration `yaml:"presign_ttl" env-required:"true"`
@@ -28,7 +29,7 @@ type Postgres struct {
 }
 
 type GRPC struct {
-	Port int `yaml:"port" env-default:"50051"`
+	Port int `yaml:"port" env-default:"50052"`
 }
 
 func MustLoad() *Config {
