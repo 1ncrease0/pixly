@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package art;
+
+option go_package = "pixly.art.v1;artv1";
+
+service Art {
+  rpc SavePixelart(SavePixelartRequest) returns (SavePixelartResponse);
+  rpc UpdateCanvas(UpdateCanvasRequest) returns (UpdateCanvasResponse);
+  rpc DeletePixelart(DeletePixelartRequest) returns (DeletePixelartResponse);
+  rpc GetUserPixelart(GetUserPixelartRequest) returns (GetUserPixelartResponse);
+  rpc GetUserPreviews(GetUserPreviewsRequest) returns (GetUserPreviewsResponse);
+}
+
+message SavePixelartRequest{
+  string user_id = 1;
+  repeated string palette = 2;
+  repeated int64 pixels = 3;
+  int64 width = 4;
+  int64 height = 5;
+  string title = 6;
+}
+
+message SavePixelartResponse {
+  string pixelart_id = 1;
+}
+
+message UpdateCanvasRequest{
+  string pixelart_id = 1;
+  string user_id = 2;
+  repeated string palette = 3;
+  repeated int64 pixels = 4;
+  int64 width = 5;
+  int64 height = 6;
+}
+
+message UpdateCanvasResponse {
+}
+
+message DeletePixelartRequest{
+  string pixelart_id = 1;
+  string user_id = 2;
+}
+
+message DeletePixelartResponse {
+
+}
+
+message GetUserPixelartRequest{
+  string pixelart_id = 1;
+  string user_id = 2;
+}
+
+message GetUserPixelartResponse {
+  repeated string palette = 2;
+  repeated int64 pixels = 3;
+  int64 width = 4;
+  int64 height = 5;
+  string title = 6;
+  string image_url = 7;
+
+}
+
+message GetUserPreviewsRequest{
+  string user_id = 1;
+}
+
+
+message Preview {
+  string pixelart_id = 1;
+  string title = 2;
+  string image_url = 3;
+}
+
+message GetUserPreviewsResponse {
+  repeated Preview previews = 1;
+
+}
+

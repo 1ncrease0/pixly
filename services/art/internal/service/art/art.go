@@ -74,10 +74,14 @@ func (s *Service) SavePixelart(ctx context.Context, userID uuid.UUID, title doma
 	return id, nil
 }
 
-func (s *Service) UpdateCanvas(ctx context.Context, id uuid.UUID, canvas domain.Canvas) error {
+func (s *Service) UpdateCanvas(ctx context.Context, userID, id uuid.UUID, canvas domain.Canvas) error {
 	art, err := s.repo.PixelartByID(ctx, id)
 	if err != nil {
 		return err
+	}
+
+	if userID != art.UserID() {
+		return domain.ErrPixelartNotFound
 	}
 
 	art.ChangeCanvas(canvas)
@@ -104,6 +108,13 @@ func (s *Service) UserPixelart(ctx context.Context, id uuid.UUID, userID uuid.UU
 	if art.UserID() != userID {
 		return nil, domain.ErrPixelartNotFound
 	}
+
+	url, err := s.imageProvider.GetImageURL(ctx, art.ImageKey())
+	if err != nil {
+		s.log.Warn("get image url", slog.String("key", art.ImageKey()), slog.Any("err", err))
+	}
+
+	art.SetKey(url)
 	return art, nil
 }
 
@@ -124,10 +135,14 @@ func (s *Service) UserPreviews(ctx context.Context, userID uuid.UUID) ([]domain.
 	return previews, nil
 }
 
-func (s *Service) DeletePixelart(ctx context.Context, id uuid.UUID) error {
+func (s *Service) DeletePixelart(ctx context.Context, userID, id uuid.UUID) error {
 	art, err := s.repo.PixelartByID(ctx, id)
 	if err != nil {
 		return err
+	}
+
+	if userID != art.UserID() {
+		return domain.ErrPixelartNotFound
 	}
 
 	objectKey := art.ImageKey()
