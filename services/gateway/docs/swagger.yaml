@@ -1,3 +1,4 @@
+basePath: /
 definitions:
   github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.Code:
     enum:
@@ -10,10 +11,13 @@ definitions:
     - USERNAME_TAKEN
     - USER_NOT_FOUND
     - USER_NOT_VERIFIED
+    - USER_ALREADY_VERIFIED
     - UNAUTHENTICATED
     - SESSION_NOT_FOUND
     - SESSION_EXPIRED
     - INTERNAL_ERROR
+    - PIXELART_NOT_FOUND
+    - PIXELART_CONFLICT
     type: string
     x-enum-varnames:
     - BadRequest
@@ -25,10 +29,13 @@ definitions:
     - UsernameTaken
     - UserNotFound
     - UserNotVerified
+    - UserAlreadyVerified
     - Unauthenticated
     - SessionNotFound
     - SessionExpired
     - InternalError
+    - PixelartNotFound
+    - PixelartConflict
   github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorDetail:
     properties:
       code:
@@ -49,6 +56,41 @@ definitions:
       status:
         example: 400
         type: integer
+    type: object
+  internal_infra_api_handlers_art.SavePixelartRequest:
+    properties:
+      height:
+        example: 16
+        type: integer
+      palette:
+        example:
+        - '#000000'
+        - '#ffffff'
+        items:
+          type: string
+        type: array
+      pixels:
+        items:
+          type: integer
+        type: array
+      title:
+        example: My pixel art
+        type: string
+      width:
+        example: 16
+        type: integer
+    required:
+    - height
+    - palette
+    - pixels
+    - title
+    - width
+    type: object
+  internal_infra_api_handlers_art.SavePixelartResponse:
+    properties:
+      pixelart_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
     type: object
   internal_infra_api_handlers_auth.LoginRequest:
     properties:
@@ -83,7 +125,7 @@ definitions:
   internal_infra_api_handlers_auth.RefreshRequest:
     properties:
       refresh_token:
-        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        example: ""
         type: string
     type: object
   internal_infra_api_handlers_auth.RegisterRequest:
@@ -118,9 +160,12 @@ definitions:
       access_token:
         example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         type: string
-      refresh_token:
-        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-        type: string
+      access_ttl_sec:
+        example: 900
+        type: integer
+      refresh_ttl_sec:
+        example: 2592000
+        type: integer
     type: object
   internal_infra_api_handlers_healthcheck.HealthResponse:
     properties:
@@ -133,12 +178,16 @@ definitions:
     type: object
 info:
   contact: {}
+  description: Pixly gateway HTTP API.
+  title: Pixly Gateway API
+  version: "1.0"
 paths:
   /api/v1/auth/login:
     post:
       consumes:
       - application/json
-      description: Authenticate by email and password. Returns access_token and refresh_token.
+      description: Authenticate by email and password. Returns access_token and TTLs.
+        Refresh token is set in httpOnly cookie.
       parameters:
       - description: Email and password
         in: body
@@ -172,12 +221,13 @@ paths:
     post:
       consumes:
       - application/json
-      description: Issue new access and refresh tokens using a valid refresh_token.
+      description: Issue new access token using refresh token from httpOnly cookie
+        (or optional body). New refresh token is set in cookie. Returns access_token
+        and TTLs.
       parameters:
-      - description: Refresh token
+      - description: Refresh token (optional if sent via cookie)
         in: body
         name: body
-        required: true
         schema:
           $ref: '#/definitions/internal_infra_api_handlers_auth.RefreshRequest'
       produces:
@@ -188,7 +238,7 @@ paths:
           schema:
             $ref: '#/definitions/internal_infra_api_handlers_auth.TokenPairResponse'
         "400":
-          description: Bad Request
+          description: Missing refresh token
           schema:
             $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
         "401":
@@ -316,4 +366,46 @@ paths:
       summary: Current user
       tags:
       - auth
+  /api/v1/pixelart:
+    post:
+      consumes:
+      - application/json
+      description: 'Create a new pixelart for the authenticated user. Requires Authorization:
+        Bearer &lt;access_token&gt;.'
+      parameters:
+      - description: Pixelart data (title, palette, pixels, width, height)
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_infra_api_handlers_art.SavePixelartRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_infra_api_handlers_art.SavePixelartResponse'
+        "400":
+          description: BAD_REQUEST, invalid body or validation
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+        "401":
+          description: UNAUTHENTICATED
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+        "409":
+          description: PIXELART_CONFLICT
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Save pixelart
+      tags:
+      - art
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

@@ -18,4 +18,7 @@ var (
 
 	ErrInvalidArgument = errors.New("invalid argument")
 	ErrAlreadyExists   = errors.New("already exists")
+
+	ErrPixelartNotFound = errors.New("pixelart not found")
+	ErrPixelartConflict = errors.New("pixelart conflict")
 )

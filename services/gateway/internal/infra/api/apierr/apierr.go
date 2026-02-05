@@ -45,6 +45,8 @@ const (
 	SessionNotFound         Code = "SESSION_NOT_FOUND"
 	SessionExpired          Code = "SESSION_EXPIRED"
 	InternalError           Code = "INTERNAL_ERROR"
+	PixelartNotFound        Code = "PIXELART_NOT_FOUND"
+	PixelartConflict        Code = "PIXELART_CONFLICT"
 )
 
 func ErrorToResponse(err error) ErrorResponse {
@@ -75,6 +77,10 @@ func ErrorToResponse(err error) ErrorResponse {
 		return NewErrorResponse(http.StatusUnauthorized, SessionExpired, "Refresh token expired", "")
 	case errors.Is(err, domain.ErrInvalidArgument):
 		return NewErrorResponse(http.StatusBadRequest, BadRequest, "Invalid argument", "")
+	case errors.Is(err, domain.ErrPixelartNotFound):
+		return NewErrorResponse(http.StatusNotFound, PixelartNotFound, "Pixelart not found", "")
+	case errors.Is(err, domain.ErrPixelartConflict):
+		return NewErrorResponse(http.StatusConflict, PixelartConflict, "Pixelart conflict", "")
 	default:
 		return NewErrorResponse(http.StatusInternalServerError, InternalError, "Internal server error", "")
 	}

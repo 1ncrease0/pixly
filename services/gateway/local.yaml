@@ -30,6 +30,11 @@ clients:
     addr: "localhost:50051"
     timeout: 5s
     retries: 1
+  art:
+    addr: "localhost:50052"
+    timeout: 5s
+    retries: 1
+
 
 jwt:
   secret_key: "secretkey"

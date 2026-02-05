@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/api/v1/auth/login": {
             "post": {
-                "description": "Authenticate by email and password. Returns access_token and refresh_token.",
+                "description": "Authenticate by email and password. Returns access_token and TTLs. Refresh token is set in httpOnly cookie.",
                 "consumes": [
                     "application/json"
                 ],
@@ -69,7 +69,7 @@ const docTemplate = `{
         },
         "/api/v1/auth/refresh": {
             "post": {
-                "description": "Issue new access and refresh tokens using a valid refresh_token.",
+                "description": "Issue new access token using refresh token from httpOnly cookie (or optional body). New refresh token is set in cookie. Returns access_token and TTLs.",
                 "consumes": [
                     "application/json"
                 ],
@@ -82,10 +82,9 @@ const docTemplate = `{
                 "summary": "Refresh tokens",
                 "parameters": [
                     {
-                        "description": "Refresh token",
+                        "description": "Refresh token (optional if sent via cookie)",
                         "name": "body",
                         "in": "body",
-                        "required": true,
                         "schema": {
                             "$ref": "#/definitions/internal_infra_api_handlers_auth.RefreshRequest"
                         }
@@ -99,7 +98,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Missing refresh token",
                         "schema": {
                             "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
                         }
@@ -290,6 +289,63 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/pixelart": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new pixelart for the authenticated user. Requires Authorization: Bearer \u0026lt;access_token\u0026gt;.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "art"
+                ],
+                "summary": "Save pixelart",
+                "parameters": [
+                    {
+                        "description": "Pixelart data (title, palette, pixels, width, height)",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_infra_api_handlers_art.SavePixelartRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/internal_infra_api_handlers_art.SavePixelartResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "BAD_REQUEST, invalid body or validation",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "UNAUTHENTICATED",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "PIXELART_CONFLICT",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -305,10 +361,13 @@ const docTemplate = `{
                 "USERNAME_TAKEN",
                 "USER_NOT_FOUND",
                 "USER_NOT_VERIFIED",
+                "USER_ALREADY_VERIFIED",
                 "UNAUTHENTICATED",
                 "SESSION_NOT_FOUND",
                 "SESSION_EXPIRED",
-                "INTERNAL_ERROR"
+                "INTERNAL_ERROR",
+                "PIXELART_NOT_FOUND",
+                "PIXELART_CONFLICT"
             ],
             "x-enum-varnames": [
                 "BadRequest",
@@ -320,10 +379,13 @@ const docTemplate = `{
                 "UsernameTaken",
                 "UserNotFound",
                 "UserNotVerified",
+                "UserAlreadyVerified",
                 "Unauthenticated",
                 "SessionNotFound",
                 "SessionExpired",
-                "InternalError"
+                "InternalError",
+                "PixelartNotFound",
+                "PixelartConflict"
             ]
         },
         "github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorDetail": {
@@ -356,6 +418,55 @@ const docTemplate = `{
                 "status": {
                     "type": "integer",
                     "example": 400
+                }
+            }
+        },
+        "internal_infra_api_handlers_art.SavePixelartRequest": {
+            "type": "object",
+            "required": [
+                "height",
+                "palette",
+                "pixels",
+                "title",
+                "width"
+            ],
+            "properties": {
+                "height": {
+                    "type": "integer",
+                    "example": 16
+                },
+                "palette": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "#000000",
+                        "#ffffff"
+                    ]
+                },
+                "pixels": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "title": {
+                    "type": "string",
+                    "example": "My pixel art"
+                },
+                "width": {
+                    "type": "integer",
+                    "example": 16
+                }
+            }
+        },
+        "internal_infra_api_handlers_art.SavePixelartResponse": {
+            "type": "object",
+            "properties": {
+                "pixelart_id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
                 }
             }
         },
@@ -407,7 +518,7 @@ const docTemplate = `{
             "properties": {
                 "refresh_token": {
                     "type": "string",
-                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    "example": ""
                 }
             }
         },
@@ -457,9 +568,13 @@ const docTemplate = `{
                     "type": "string",
                     "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
                 },
-                "refresh_token": {
-                    "type": "string",
-                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                "access_ttl_sec": {
+                    "type": "integer",
+                    "example": 900
+                },
+                "refresh_ttl_sec": {
+                    "type": "integer",
+                    "example": 2592000
                 }
             }
         },
@@ -476,17 +591,24 @@ const docTemplate = `{
                 }
             }
         }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
+	Version:          "1.0",
 	Host:             "",
-	BasePath:         "",
+	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Title:            "Pixly Gateway API",
+	Description:      "Pixly gateway HTTP API.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

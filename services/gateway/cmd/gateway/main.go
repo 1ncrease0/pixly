@@ -7,6 +7,7 @@ import (
 	"github.com/1ncrease0/pixly/pkg/logger"
 	"github.com/1ncrease0/pixly/services/gateway/internal/config"
 	"github.com/1ncrease0/pixly/services/gateway/internal/infra/api"
+	"github.com/1ncrease0/pixly/services/gateway/internal/infra/grpc/art"
 	"github.com/1ncrease0/pixly/services/gateway/internal/infra/grpc/auth"
 	"log/slog"
 	"os"
@@ -31,9 +32,21 @@ func main() {
 		}
 	}()
 
+	artClient, err := art.NewClient(cfg.Clients.Art.Addr, cfg.Clients.Art.Timeout, cfg.Clients.Art.Retries, log)
+	if err != nil {
+		log.Error("failed to create art client", slog.Any("error", err))
+		return
+	}
+	defer func() {
+		err = artClient.Close()
+		if err != nil {
+			log.Error("failed to close art client", slog.Any("error", err))
+		}
+	}()
+
 	jwtManager := jwt.NewManager(cfg.JWT.Secret, cfg.JWT.AccessTTL, cfg.JWT.RefreshTTL)
 
-	router := api.InitRoutes(cfg, log, authClient, jwtManager)
+	router := api.InitRoutes(cfg, log, authClient, artClient, jwtManager)
 	httpServer := httpserver.New(
 		httpserver.Params{
 			Addr:            cfg.HTTP.Host + ":" + strconv.Itoa(cfg.HTTP.Port),

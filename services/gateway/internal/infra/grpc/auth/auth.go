@@ -5,6 +5,7 @@ import (
 	"fmt"
 	authv1 "github.com/1ncrease0/pixly/proto/gen/auth"
 	"github.com/1ncrease0/pixly/services/gateway/internal/domain"
+	"github.com/1ncrease0/pixly/services/gateway/internal/domain/auth"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/retry"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
@@ -96,10 +97,10 @@ func (c *Client) Register(ctx context.Context, email, username, password string)
 			case codes.AlreadyExists:
 				switch violation.Field {
 				case "email":
-					c.log.Info("register failed: user already exists", slog.String("email", email))
+					c.log.Debug("register failed: user already exists", slog.String("email", email))
 					return domain.ErrUserAlreadyExists
 				case "username":
-					c.log.Info("register failed: username taken", slog.String("username", username))
+					c.log.Debug("register failed: username taken", slog.String("username", username))
 					return domain.ErrUsernameTaken
 				}
 			}
@@ -110,8 +111,11 @@ func (c *Client) Register(ctx context.Context, email, username, password string)
 		c.log.Debug("register failed: invalid argument")
 		return domain.ErrInvalidArgument
 	case codes.AlreadyExists:
-		c.log.Info("register failed: already exists")
+		c.log.Debug("register failed: already exists")
 		return domain.ErrAlreadyExists
+	case codes.Unavailable:
+		c.log.Warn("register failed: auth service unavailable")
+		return fmt.Errorf("auth service unavailable")
 	default:
 		c.log.Warn("register failed: unexpected status code", slog.String("code", st.Code().String()), slog.String("message", st.Message()))
 		return fmt.Errorf("register failed: %s", st.Message())
@@ -142,19 +146,22 @@ func (c *Client) VerifyEmail(ctx context.Context, code string) error {
 	case codes.Internal:
 		c.log.Error("verify email failed: internal error", slog.String("message", st.Message()))
 		return fmt.Errorf("verify email failed: %s", st.Message())
+	case codes.Unavailable:
+		c.log.Warn("verify email failed: auth service unavailable")
+		return fmt.Errorf("auth service unavailable")
 	default:
 		c.log.Warn("verify email failed: unexpected status code", slog.String("code", st.Code().String()), slog.String("message", st.Message()))
 		return fmt.Errorf("verify email failed: %s", st.Message())
 	}
 }
 
-func (c *Client) Login(ctx context.Context, email, password string) (*domain.TokenPair, error) {
+func (c *Client) Login(ctx context.Context, email, password string) (*auth.TokenPair, error) {
 	resp, err := c.client.Login(ctx, &authv1.LoginRequest{
 		Email:    email,
 		Password: password,
 	})
 	if err == nil {
-		return &domain.TokenPair{
+		return &auth.TokenPair{
 			AccessToken:  resp.AccessToken,
 			RefreshToken: resp.RefreshToken,
 		}, nil
@@ -189,29 +196,32 @@ func (c *Client) Login(ctx context.Context, email, password string) (*domain.Tok
 		c.log.Debug("login failed: invalid argument")
 		return nil, domain.ErrInvalidArgument
 	case codes.Unauthenticated:
-		c.log.Info("login failed: authentication failed")
+		c.log.Debug("login failed: authentication failed")
 		return nil, domain.ErrUnauthenticated
 	case codes.FailedPrecondition:
-		c.log.Info("login failed: user not verified")
+		c.log.Debug("login failed: user not verified")
 		return nil, domain.ErrUserNotVerified
 	case codes.NotFound:
-		c.log.Info("login failed: user not found")
+		c.log.Debug("login failed: user not found")
 		return nil, domain.ErrUserNotFound
 	case codes.Internal:
 		c.log.Error("login failed: internal error", slog.String("message", st.Message()))
 		return nil, fmt.Errorf("login failed: %s", st.Message())
+	case codes.Unavailable:
+		c.log.Warn("login failed: auth service unavailable")
+		return nil, fmt.Errorf("auth service unavailable")
 	default:
 		c.log.Warn("login failed: unexpected status code", slog.String("code", st.Code().String()), slog.String("message", st.Message()))
 		return nil, fmt.Errorf("login failed: %s", st.Message())
 	}
 }
 
-func (c *Client) Refresh(ctx context.Context, refreshToken string) (*domain.TokenPair, error) {
+func (c *Client) Refresh(ctx context.Context, refreshToken string) (*auth.TokenPair, error) {
 	resp, err := c.client.Refresh(ctx, &authv1.RefreshRequest{
 		RefreshToken: refreshToken,
 	})
 	if err == nil {
-		return &domain.TokenPair{
+		return &auth.TokenPair{
 			AccessToken:  resp.AccessToken,
 			RefreshToken: resp.RefreshToken,
 		}, nil
@@ -228,17 +238,20 @@ func (c *Client) Refresh(ctx context.Context, refreshToken string) (*domain.Toke
 		c.log.Debug("refresh failed: invalid argument")
 		return nil, domain.ErrInvalidArgument
 	case codes.Unauthenticated:
-		c.log.Info("refresh failed: session not found or expired")
+		c.log.Debug("refresh failed: session not found or expired")
 		return nil, domain.ErrSessionNotFound
 	case codes.NotFound:
-		c.log.Info("refresh failed: user not found")
+		c.log.Debug("refresh failed: user not found")
 		return nil, domain.ErrUserNotFound
 	case codes.FailedPrecondition:
-		c.log.Info("refresh failed: user not verified")
+		c.log.Debug("refresh failed: user not verified")
 		return nil, domain.ErrUserNotVerified
 	case codes.Internal:
 		c.log.Error("refresh failed: internal error", slog.String("message", st.Message()))
 		return nil, fmt.Errorf("refresh failed: %s", st.Message())
+	case codes.Unavailable:
+		c.log.Warn("refresh failed: auth service unavailable")
+		return nil, fmt.Errorf("auth service unavailable")
 	default:
 		c.log.Warn("refresh failed: unexpected status code", slog.String("code", st.Code().String()), slog.String("message", st.Message()))
 		return nil, fmt.Errorf("refresh failed: %s", st.Message())
@@ -278,26 +291,29 @@ func (c *Client) ResendVerification(ctx context.Context, email string) error {
 		c.log.Debug("resend verification failed: invalid argument")
 		return domain.ErrInvalidEmail
 	case codes.NotFound:
-		c.log.Info("resend verification failed: user not found")
+		c.log.Debug("resend verification failed: user not found")
 		return domain.ErrUserNotFound
 	case codes.FailedPrecondition:
-		c.log.Info("resend verification failed: user already verified")
+		c.log.Debug("resend verification failed: user already verified")
 		return domain.ErrUserAlreadyVerified
 	case codes.Internal:
 		c.log.Error("resend verification failed: internal error", slog.String("message", st.Message()))
 		return fmt.Errorf("resend verification failed: %s", st.Message())
+	case codes.Unavailable:
+		c.log.Warn("resend verification failed: auth service unavailable")
+		return fmt.Errorf("auth service unavailable")
 	default:
 		c.log.Warn("resend verification failed: unexpected status code", slog.String("code", st.Code().String()), slog.String("message", st.Message()))
 		return fmt.Errorf("resend verification failed: %s", st.Message())
 	}
 }
 
-func (c *Client) GetUser(ctx context.Context, userID string) (*domain.User, error) {
+func (c *Client) GetUser(ctx context.Context, userID string) (*auth.User, error) {
 	resp, err := c.client.GetUser(ctx, &authv1.GetUserRequest{
 		Id: userID,
 	})
 	if err == nil {
-		return &domain.User{
+		return &auth.User{
 			ID:       resp.Id,
 			Email:    resp.Email,
 			Username: resp.Username,
@@ -315,14 +331,17 @@ func (c *Client) GetUser(ctx context.Context, userID string) (*domain.User, erro
 		c.log.Debug("get user failed: invalid argument", slog.String("user_id", userID))
 		return nil, domain.ErrInvalidArgument
 	case codes.NotFound:
-		c.log.Info("get user failed: user not found", slog.String("user_id", userID))
+		c.log.Debug("get user failed: user not found", slog.String("user_id", userID))
 		return nil, domain.ErrUserNotFound
 	case codes.FailedPrecondition:
-		c.log.Info("get user failed: user not verified", slog.String("user_id", userID))
+		c.log.Debug("get user failed: user not verified", slog.String("user_id", userID))
 		return nil, domain.ErrUserNotVerified
 	case codes.Internal:
 		c.log.Error("get user failed: internal error", slog.String("user_id", userID), slog.String("message", st.Message()))
 		return nil, fmt.Errorf("get user failed: %s", st.Message())
+	case codes.Unavailable:
+		c.log.Warn("get user failed: auth service unavailable", slog.String("user_id", userID))
+		return nil, fmt.Errorf("auth service unavailable")
 	default:
 		c.log.Warn("get user failed: unexpected status code", slog.String("user_id", userID), slog.String("code", st.Code().String()), slog.String("message", st.Message()))
 		return nil, fmt.Errorf("get user failed: %s", st.Message())

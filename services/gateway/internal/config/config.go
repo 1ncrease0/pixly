@@ -16,6 +16,7 @@ type Config struct {
 
 type Clients struct {
 	Auth GRPCService `yaml:"auth"`
+	Art  GRPCService `yaml:"art"`
 }
 
 type GRPCService struct {
