@@ -2,6 +2,7 @@ package domain
 
 import (
 	"errors"
+
 	"github.com/google/uuid"
 )
 
@@ -44,6 +45,9 @@ func (u *User) Name() Username {
 }
 func (u *User) PasswordHash() string {
 	return u.password.Hash()
+}
+func (u *User) Password() Password {
+	return u.password
 }
 func (u *User) IsVerified() bool {
 	return u.isVerified

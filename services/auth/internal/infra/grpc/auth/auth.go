@@ -3,6 +3,8 @@ package auth
 import (
 	"context"
 	"errors"
+	"log/slog"
+
 	authv1 "github.com/1ncrease0/pixly/proto/gen/auth"
 	"github.com/1ncrease0/pixly/services/auth/internal/domain"
 	"github.com/google/uuid"
@@ -10,7 +12,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"log/slog"
 )
 
 type Service interface {
@@ -18,7 +19,7 @@ type Service interface {
 	Register(ctx context.Context, email domain.Email, name domain.Username, password domain.Password) error
 	Refresh(ctx context.Context, refreshToken string) (*domain.TokenPair, error)
 	ResendVerification(ctx context.Context, email domain.Email) error
-	Login(ctx context.Context, email domain.Email, password domain.Password) (*domain.TokenPair, error)
+	Login(ctx context.Context, email domain.Email, rawPassword string) (*domain.TokenPair, error)
 	User(ctx context.Context, id uuid.UUID) (*domain.User, error)
 }
 
@@ -43,8 +44,7 @@ func (s *Server) Login(ctx context.Context, req *authv1.LoginRequest) (*authv1.L
 		})
 	}
 
-	password, err := domain.NewPassword(req.Password)
-	if err != nil {
+	if req.Password == "" || len(req.Password) < 8 {
 		violations = append(violations, &errdetails.BadRequest_FieldViolation{
 			Field:       "password",
 			Description: "password must be at least 8 characters",
@@ -61,7 +61,7 @@ func (s *Server) Login(ctx context.Context, req *authv1.LoginRequest) (*authv1.L
 		return nil, st.Err()
 	}
 
-	tokens, err := s.service.Login(ctx, email, password)
+	tokens, err := s.service.Login(ctx, email, req.Password)
 	if err != nil {
 		switch {
 		case errors.Is(err, domain.ErrUserNotFound):

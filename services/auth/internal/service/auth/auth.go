@@ -2,11 +2,12 @@ package auth
 
 import (
 	"context"
+	"time"
+
 	"github.com/1ncrease0/pixly/pkg/jwt"
 	"github.com/1ncrease0/pixly/services/auth/internal/domain"
 	"github.com/1ncrease0/pixly/services/auth/internal/domain/events"
 	"github.com/google/uuid"
-	"time"
 )
 
 type UserRepo interface {
@@ -79,7 +80,7 @@ func (s *AuthService) VerifyEmail(ctx context.Context, code domain.VerificationC
 	return nil
 }
 
-func (s *AuthService) Login(ctx context.Context, email domain.Email, password domain.Password) (*domain.TokenPair, error) {
+func (s *AuthService) Login(ctx context.Context, email domain.Email, rawPassword string) (*domain.TokenPair, error) {
 	u, err := s.userRepo.UserByEmail(ctx, email)
 	if err != nil {
 		return nil, err
@@ -89,7 +90,7 @@ func (s *AuthService) Login(ctx context.Context, email domain.Email, password do
 		return nil, domain.ErrUserNotVerified
 	}
 
-	if u.PasswordHash() != password.Hash() {
+	if !u.Password().Equals(rawPassword) {
 		return nil, domain.ErrInvalidPassword
 	}
 
