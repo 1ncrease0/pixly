@@ -9,6 +9,8 @@ package api
 // @name Authorization
 
 import (
+	"log/slog"
+
 	"github.com/1ncrease0/pixly/pkg/jwt"
 	"github.com/1ncrease0/pixly/services/gateway/internal/config"
 	"github.com/1ncrease0/pixly/services/gateway/internal/infra/api/handlers/art"
@@ -20,7 +22,6 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"log/slog"
 
 	_ "github.com/1ncrease0/pixly/services/gateway/docs"
 )
@@ -62,6 +63,10 @@ func InitRoutes(cfg *config.Config, log *slog.Logger, authClient auth.AuthClient
 
 		v1.GET("/me", authMiddleware, authH.Me)
 		v1.POST("/pixelart", authMiddleware, artH.SavePixelart)
+		v1.GET("/pixelarts", authMiddleware, artH.GetUserPreviews)
+		v1.GET("/pixelart/:id", authMiddleware, artH.GetUserPixelart)
+		v1.PUT("/pixelart/:id", authMiddleware, artH.UpdateCanvas)
+		v1.DELETE("/pixelart/:id", authMiddleware, artH.DeletePixelart)
 	}
 	return r
 }
