@@ -65,7 +65,7 @@ func InitRoutes(cfg *config.Config, log *slog.Logger, authClient auth.AuthClient
 		v1.POST("/pixelart", authMiddleware, artH.SavePixelart)
 		v1.GET("/pixelarts", authMiddleware, artH.GetUserPreviews)
 		v1.GET("/pixelart/:id", authMiddleware, artH.GetUserPixelart)
-		v1.PUT("/pixelart/:id", authMiddleware, artH.UpdateCanvas)
+		v1.PATCH("/pixelart/:id", authMiddleware, artH.UpdateCanvas)
 		v1.DELETE("/pixelart/:id", authMiddleware, artH.DeletePixelart)
 	}
 	return r

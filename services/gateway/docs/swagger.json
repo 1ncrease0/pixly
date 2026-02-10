@@ -339,6 +339,213 @@
                     }
                 }
             }
+        },
+        "/api/v1/pixelart/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get a specific pixelart by ID for the authenticated user. Requires Authorization: Bearer \u0026lt;access_token\u0026gt;.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "art"
+                ],
+                "summary": "Get pixelart by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Pixelart ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_infra_api_handlers_art.GetUserPixelartResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "BAD_REQUEST",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "UNAUTHENTICATED",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "PIXELART_NOT_FOUND",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete a pixelart by ID. Requires Authorization: Bearer \u0026lt;access_token\u0026gt;.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "art"
+                ],
+                "summary": "Delete pixelart",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Pixelart ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "BAD_REQUEST",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "UNAUTHENTICATED",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "PIXELART_NOT_FOUND",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update the canvas of an existing pixelart. Requires Authorization: Bearer \u0026lt;access_token\u0026gt;.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "art"
+                ],
+                "summary": "Update pixelart canvas",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Pixelart ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Canvas data (palette, pixels, width, height)",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_infra_api_handlers_art.UpdateCanvasRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "BAD_REQUEST",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "UNAUTHENTICATED",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "PIXELART_NOT_FOUND",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/pixelarts": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get list of all pixelart previews for the authenticated user. Requires Authorization: Bearer \u0026lt;access_token\u0026gt;.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "art"
+                ],
+                "summary": "Get user pixelarts previews",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_infra_api_handlers_art.GetUserPreviewsResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "UNAUTHENTICATED",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "INTERNAL_ERROR",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -414,6 +621,71 @@
                 }
             }
         },
+        "internal_infra_api_handlers_art.GetUserPixelartResponse": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "integer",
+                    "example": 16
+                },
+                "image_url": {
+                    "type": "string",
+                    "example": "https://minio.example.com/pixelarts/abc.png"
+                },
+                "palette": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "#000000",
+                        "#ffffff"
+                    ]
+                },
+                "pixels": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "title": {
+                    "type": "string",
+                    "example": "My pixel art"
+                },
+                "width": {
+                    "type": "integer",
+                    "example": 16
+                }
+            }
+        },
+        "internal_infra_api_handlers_art.GetUserPreviewsResponse": {
+            "type": "object",
+            "properties": {
+                "previews": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_infra_api_handlers_art.PreviewResponse"
+                    }
+                }
+            }
+        },
+        "internal_infra_api_handlers_art.PreviewResponse": {
+            "type": "object",
+            "properties": {
+                "image_url": {
+                    "type": "string",
+                    "example": "https://minio.example.com/pixelarts/abc.png"
+                },
+                "pixelart_id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "My pixel art"
+                }
+            }
+        },
         "internal_infra_api_handlers_art.SavePixelartRequest": {
             "type": "object",
             "required": [
@@ -460,6 +732,41 @@
                 "pixelart_id": {
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
+                }
+            }
+        },
+        "internal_infra_api_handlers_art.UpdateCanvasRequest": {
+            "type": "object",
+            "required": [
+                "height",
+                "palette",
+                "pixels",
+                "width"
+            ],
+            "properties": {
+                "height": {
+                    "type": "integer",
+                    "example": 16
+                },
+                "palette": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "#000000",
+                        "#ffffff"
+                    ]
+                },
+                "pixels": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "width": {
+                    "type": "integer",
+                    "example": 16
                 }
             }
         },

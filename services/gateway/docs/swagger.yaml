@@ -57,6 +57,51 @@ definitions:
         example: 400
         type: integer
     type: object
+  internal_infra_api_handlers_art.GetUserPixelartResponse:
+    properties:
+      height:
+        example: 16
+        type: integer
+      image_url:
+        example: https://minio.example.com/pixelarts/abc.png
+        type: string
+      palette:
+        example:
+        - '#000000'
+        - '#ffffff'
+        items:
+          type: string
+        type: array
+      pixels:
+        items:
+          type: integer
+        type: array
+      title:
+        example: My pixel art
+        type: string
+      width:
+        example: 16
+        type: integer
+    type: object
+  internal_infra_api_handlers_art.GetUserPreviewsResponse:
+    properties:
+      previews:
+        items:
+          $ref: '#/definitions/internal_infra_api_handlers_art.PreviewResponse'
+        type: array
+    type: object
+  internal_infra_api_handlers_art.PreviewResponse:
+    properties:
+      image_url:
+        example: https://minio.example.com/pixelarts/abc.png
+        type: string
+      pixelart_id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      title:
+        example: My pixel art
+        type: string
+    type: object
   internal_infra_api_handlers_art.SavePixelartRequest:
     properties:
       height:
@@ -91,6 +136,31 @@ definitions:
       pixelart_id:
         example: 550e8400-e29b-41d4-a716-446655440000
         type: string
+    type: object
+  internal_infra_api_handlers_art.UpdateCanvasRequest:
+    properties:
+      height:
+        example: 16
+        type: integer
+      palette:
+        example:
+        - '#000000'
+        - '#ffffff'
+        items:
+          type: string
+        type: array
+      pixels:
+        items:
+          type: integer
+        type: array
+      width:
+        example: 16
+        type: integer
+    required:
+    - height
+    - palette
+    - pixels
+    - width
     type: object
   internal_infra_api_handlers_auth.LoginRequest:
     properties:
@@ -401,6 +471,141 @@ paths:
       security:
       - BearerAuth: []
       summary: Save pixelart
+      tags:
+      - art
+  /api/v1/pixelart/{id}:
+    delete:
+      description: 'Delete a pixelart by ID. Requires Authorization: Bearer &lt;access_token&gt;.'
+      parameters:
+      - description: Pixelart ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: BAD_REQUEST
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+        "401":
+          description: UNAUTHENTICATED
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+        "404":
+          description: PIXELART_NOT_FOUND
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete pixelart
+      tags:
+      - art
+    get:
+      description: 'Get a specific pixelart by ID for the authenticated user. Requires
+        Authorization: Bearer &lt;access_token&gt;.'
+      parameters:
+      - description: Pixelart ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_infra_api_handlers_art.GetUserPixelartResponse'
+        "400":
+          description: BAD_REQUEST
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+        "401":
+          description: UNAUTHENTICATED
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+        "404":
+          description: PIXELART_NOT_FOUND
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get pixelart by ID
+      tags:
+      - art
+    patch:
+      consumes:
+      - application/json
+      description: 'Update the canvas of an existing pixelart. Requires Authorization:
+        Bearer &lt;access_token&gt;.'
+      parameters:
+      - description: Pixelart ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Canvas data (palette, pixels, width, height)
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_infra_api_handlers_art.UpdateCanvasRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: BAD_REQUEST
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+        "401":
+          description: UNAUTHENTICATED
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+        "404":
+          description: PIXELART_NOT_FOUND
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update pixelart canvas
+      tags:
+      - art
+  /api/v1/pixelarts:
+    get:
+      description: 'Get list of all pixelart previews for the authenticated user.
+        Requires Authorization: Bearer &lt;access_token&gt;.'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_infra_api_handlers_art.GetUserPreviewsResponse'
+        "401":
+          description: UNAUTHENTICATED
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+        "500":
+          description: INTERNAL_ERROR
+          schema:
+            $ref: '#/definitions/github_com_1ncrease0_pixly_services_gateway_internal_infra_api_apierr.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user pixelarts previews
       tags:
       - art
 securityDefinitions:

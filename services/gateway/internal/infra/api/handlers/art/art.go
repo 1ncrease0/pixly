@@ -255,7 +255,7 @@ type UpdateCanvasRequest struct {
 // @Failure      400 {object} apierr.ErrorResponse "BAD_REQUEST"
 // @Failure      401 {object} apierr.ErrorResponse "UNAUTHENTICATED"
 // @Failure      404 {object} apierr.ErrorResponse "PIXELART_NOT_FOUND"
-// @Router       /api/v1/pixelart/{id} [put]
+// @Router       /api/v1/pixelart/{id} [patch]
 func (h *Handler) UpdateCanvas(c *gin.Context) {
 	userIDVal, ok := c.Get(middleware.UserIDKey)
 	if !ok {
