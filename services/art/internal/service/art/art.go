@@ -66,7 +66,7 @@ func (s *Service) SavePixelart(ctx context.Context, userID uuid.UUID, title doma
 	if err != nil {
 		nerr := s.imageProvider.DeleteImage(ctx, objectKey)
 		if nerr != nil {
-			s.log.Warn("delete image", slog.String("key", objectKey), slog.Any("err", err))
+			s.log.Error("delete image", slog.String("key", objectKey), slog.Any("err", err))
 		}
 
 		return uuid.Nil, err

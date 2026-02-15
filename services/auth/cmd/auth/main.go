@@ -23,32 +23,32 @@ func main() {
 
 	pg, err := postgres.New(cfg.Postgres.DSN)
 	if err != nil {
-		log.Error("failed to connect postgres", slog.Any("error", err))
+		log.Error("connect postgres", slog.Any("error", err))
 		return
 	}
 	defer pg.Close()
 
 	rds, err := redis.New(cfg.Redis.Addr, cfg.Redis.Password)
 	if err != nil {
-		log.Error("failed to connect redis", slog.Any("error", err))
+		log.Error("connect redis", slog.Any("error", err))
 		return
 	}
 	defer func() {
 		err = rds.Close()
 		if err != nil {
-			log.Error("failed to close redis", slog.Any("error", err))
+			log.Error("close redis", slog.Any("error", err))
 		}
 	}()
 
 	producer, err := rabbitmq.NewProducer(cfg.RabbitMQ.URL, cfg.RabbitMQ.Queue)
 	if err != nil {
-		log.Error("failed to connect rabbitmq", slog.Any("error", err))
+		log.Error("connect rabbitmq", slog.Any("error", err))
 		return
 	}
 	defer func() {
 		err = producer.Close()
 		if err != nil {
-			log.Error("failed to close rabbitmq", slog.Any("error", err))
+			log.Error("close rabbitmq", slog.Any("error", err))
 		}
 	}()
 
@@ -69,7 +69,7 @@ func main() {
 
 	select {
 	case err := <-gRPCServer.Notify():
-		log.Error("grpc server error", slog.Any("error", err))
+		log.Error("grpc server terminated", slog.Any("error", err))
 	case <-ctx.Done():
 		log.Info("shutting down")
 	}

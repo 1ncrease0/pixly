@@ -21,9 +21,7 @@ type Server struct {
 
 func New(log *slog.Logger, port int) *Server {
 	loggingOpts := []logging.Option{
-		logging.WithLogOnEvents(
-			logging.PayloadReceived, logging.PayloadSent,
-		),
+		logging.WithLogOnEvents(),
 	}
 
 	recoveryOpts := []recovery.Option{
